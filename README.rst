@@ -1,24 +1,36 @@
-Friendly Note
-==========
+How to run 
+========================
+
+install docker 
+
+`docker-compose up --build`
+
+then you go localhost:8001 
+
+
+Friendly Note       
+==========================
+
 - I notice that the master branch is going more and more broken in https://github.com/MicroPyramid/Django-CRM.
    - login page is deleted.
    - The pictures from the doc are being deleted slowly (I wonder why they removed the images...)
    - The docker file is unmaintained 
    - No body are answering the issues 
-   - ....., etc
-   
-This is originally a very amazing open-source repo. \
-So I slowly trace back to a reasonable tag where things are still making-sense (0.5.0) and applies following changes\
-- modified the docker-compose
-   - add a elasticsearch service
-   - and a celery service
-- anything else that make the projects build and pass the test
-- format the files nicely
+   - ....., etc 
+- This is originally a very amazing open-source repo. 
+   - So I slowly trace back to a reasonable tag where things are still making-sense (0.5.0) and applies following changes
+      - modified the docker-compose
+         - add a elasticsearch service
+         - and a celery service
+      - anything else that make the projects build and pass the test
+      - format the files nicely
 
 
 
 
-Django-CRM
+
+
+Django-CRM (original readme)
 ==========
 
 Django CRM is opensource CRM developed on django framework. It has all the basic features of CRM to start with. We welcome code contributions and feature requests via github.
