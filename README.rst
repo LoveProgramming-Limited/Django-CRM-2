@@ -1,15 +1,6 @@
-TOC
-======================
+How to run
+=====================================
 
-- [How to run](#how-to-run)
-- [What is this Django-CRM-2 repo?](#what-is-this-django-crm-2-repo-)
-- [Reason for Django-CRM-2](#reason-for-django-crm-2)
-- [Django-CRM (original readme)](#django-crm--original-readme-)
-
-
-
-How to run 
-========================
 
 install docker 
 
