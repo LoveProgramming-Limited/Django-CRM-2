@@ -6,7 +6,9 @@ install docker
 
 run `docker-compose up --build`
 
-django web is at : localhost:8001 
+cd into web container, create a superuser by `manage.py createsuperuser`
+
+django web is at : localhost:8001   , login with superuser account
 
 celery visualizer(flower) is at : localhost:8899
 
