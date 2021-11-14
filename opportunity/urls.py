@@ -1,4 +1,5 @@
 from django.urls import path
+
 from opportunity.views import (
     OpportunityListView, create_opportunity,
     OpportunityDetailView, update_opportunity,
@@ -7,9 +8,7 @@ from opportunity.views import (
     AddCommentView,
     UpdateCommentView, DeleteCommentView, AddAttachmentsView, DeleteAttachmentsView)
 
-
 app_name = 'opportunity'
-
 
 urlpatterns = [
     path('', OpportunityListView.as_view(), name='list'),

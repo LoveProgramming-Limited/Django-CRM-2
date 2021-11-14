@@ -4,7 +4,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ('teams', '0003_auto_20190909_1621'),
         ('tasks', '0003_task_created_on'),

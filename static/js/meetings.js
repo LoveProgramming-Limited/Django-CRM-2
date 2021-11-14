@@ -95,13 +95,11 @@ $("body").on("submit", "#model-form", function (e) {
                     $(".selectedcontacts").html("")
                     $(".selectedusers").html("")
                     $("#assignaed_user").html("")
-                }
-                else if (data["auth"] == "NO") {
+                } else if (data["auth"] == "NO") {
                     alert("Not Authanticated!!")
 
                     //login REDIRECT URL
-                }
-                else {
+                } else {
                     // console.log("Meeting Not Created")
                     // resp = JSON.parse(data);
                     if (data["success"] != "Meeting Created") {
@@ -111,16 +109,14 @@ $("body").on("submit", "#model-form", function (e) {
                         }
                     }
                 }
-            }
-            else if (status == "error") {
+            } else if (status == "error") {
                 console.log(jqXhr);
                 if (data["error"] == "Something Went Wrong!!!") {
 
                     window.location = "/";
                     console.log("Something Went Wrong!!!")
                 }
-            }
-            else {
+            } else {
                 console.log(status)
             }
         });
@@ -150,24 +146,18 @@ $("body").on("click", "#deletemeeting", function () {
                     }).animate({opacity: "0"}, 2000, function () {
                         $(this).remove();
                     });
-                }
-                else if (data["auth"] == "NO") {
+                } else if (data["auth"] == "NO") {
                     alert("Not Authanticated!!")
                     //login REDIRECT URL
-                }
-                else if (data["failed" == "ERROR"]) {
+                } else if (data["failed" == "ERROR"]) {
                     alert("ERROR OCCURED!!!\nTry Later.")
                 }
-            }
-
-            else if (status == "error") {
+            } else if (status == "error") {
                 console.log(jqXhr);
                 if (data["error"] == "Something Went Wrong!!!") {
                     window.location = "/";
                     console.log("Something Went Wrong!!!")
-                }
-
-                else {
+                } else {
                     console.log(status)
                 }
             }
@@ -212,22 +202,18 @@ $("body").on("click", ".viewthis", function (e, from_edit_this) {
                         $(".glyphicon-plus").hide()
                         $(".glyphicon-trash").hide()
                     }
-                }
-                else if (data["failed"] == "ERROR") {
+                } else if (data["failed"] == "ERROR") {
                     alert(data["failed"])
 
                     //login REDIRECT URL
-                }
-                else if (data["AUTH"] == "NO") {
+                } else if (data["AUTH"] == "NO") {
                     alert("Not Authanticated")
                     //login redirect
                 }
-            }
-            else if (status == "error") {
+            } else if (status == "error") {
                 console.log(jqXhr);
 
-            }
-            else {
+            } else {
                 console.log(status)
             }
         });
@@ -293,13 +279,11 @@ $("body").on("submit", "#update-form", function (e) {
                     $("#model-form").find("input[type=text], textarea").val("");
                     $("#updatemodeldialogclosed").attr({"id": "modeldialogclosed"})
                     $(".reminderslist[style='display:inline-flex']").remove();
-                }
-                else if (data["auth"] == "NO") {
+                } else if (data["auth"] == "NO") {
                     alert("Not Authanticated!!")
 
                     //login REDIRECT URL
-                }
-                else {
+                } else {
                     // console.log("Meeting Not Created")
                     // resp = JSON.parse(data);
                     if (data["success"] != "Meeting Updated") {
@@ -312,16 +296,14 @@ $("body").on("submit", "#update-form", function (e) {
                         }
                     }
                 }
-            }
-            else if (status == "error") {
+            } else if (status == "error") {
                 console.log(jqXhr);
                 if (data["error"] == "Something Went Wrong!!!") {
 
                     window.location = "/";
                     console.log("Something Went Wrong!!!")
                 }
-            }
-            else {
+            } else {
                 console.log(status)
             }
         });
@@ -335,6 +317,7 @@ $("body").on("click", ".editthis", function (e) {
     $(".selectedusers").html("")
     $("#assignaed_user").html("")
 });
+
 function getreminders() {
     $.get(
         "/planner/get/reminders/",
@@ -356,8 +339,7 @@ function getreminders() {
                     window.location = "/";
                     console.log("Something Went Wrong!!!")
                 }
-            }
-            else {
+            } else {
                 console.log(status)
             }
         });

@@ -1,14 +1,16 @@
-from django.test import TestCase
-from django.test import Client
-from django.urls import reverse
-from common.models import User, Document, Attachments
-from common.forms import *
+import datetime
+import json
+
 from django.core.files.uploadedfile import SimpleUploadedFile
+from django.test import Client
+from django.test import TestCase
+from django.urls import reverse
+from django.utils.encoding import force_text
+
+from common.forms import *
+from common.models import Attachments
 from leads.models import Lead
 from teams.models import Teams
-from django.utils.encoding import force_text
-import json
-import datetime
 
 
 class ObjectsCreation(object):
@@ -237,7 +239,7 @@ class UserListTestCase(ObjectsCreation, TestCase):
     def test_users_list_queryset(self):
         self.user = User.objects.all()
         data = {'first_name': 'john', 'username': 'johndoeAdmin',
-                'email': 'johndoe@admin.com', 'role':'ADMIN', 'status':'True'}
+                'email': 'johndoe@admin.com', 'role': 'ADMIN', 'status': 'True'}
         response = self.client.post('/users/list/', data)
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'list.html')
@@ -282,6 +284,7 @@ class UserUpdateTestCase(ObjectsCreation, TestCase):
     def test_accounts_update_html(self):
         response = self.client.get('/users/' + str(self.user.id) + '/edit/')
         self.assertTemplateUsed(response, 'create.html')
+
 
 # class DocumentCreateViewTestCase(ObjectsCreation,TestCase):
 #     def test_document_create(self):
@@ -462,7 +465,6 @@ class TestDocumentListViewUser(ObjectsCreation, TestCase):
 class TestViewApiSettings(ObjectsCreation, TestCase):
 
     def test_view_api_settings(self):
-
         self.api_settings = APISettings.objects.create(title='api key',
                                                        apikey='a45fds54fds54',
                                                        website='https://micropyramid.com')
@@ -537,7 +539,7 @@ class TestCommentDelete(ObjectsCreation, TestCase):
         response = self.client.post(reverse('common:remove_comment'),
                                     {'comment_id': self.comment_user.id})
         self.assertJSONEqual(force_text(response.content), {
-                             "cid": str(self.comment_user.id)})
+            "cid": str(self.comment_user.id)})
 
 
 class TestCommentEditErrors(ObjectsCreation, TestCase):
@@ -564,13 +566,13 @@ class TestCommentEditErrors(ObjectsCreation, TestCase):
         response = self.client.post(reverse('common:edit_comment', args=(self.comment_user.id,)),
                                     {'pk': self.comment_user.id, 'comment': ''})
         self.assertJSONEqual(force_text(response.content), {
-                             "error": ['This field is required.']})
+            "error": ['This field is required.']})
 
         response = self.client.post(reverse('common:edit_comment', args=(self.comment_user.id,)),
                                     {'pk': self.comment_user.id, 'comment': 'comment'})
 
         self.assertJSONEqual(force_text(response.content), {
-                             "comment_id": self.comment_user.id, "comment": 'comment'})
+            "comment_id": self.comment_user.id, "comment": 'comment'})
 
 
 class TestDocumentListUser(ObjectsCreation, TestCase):
@@ -619,9 +621,11 @@ class TestUserUpdate(ObjectsCreation, TestCase):
                                     HTTP_X_REQUESTED_WITH='XMLHttpRequest')
         self.assertJSONEqual(force_text(response.content),
                              json.dumps({"error": True, "errors": {"email": ["This field is required."],
-                                                                   "first_name": ["This field is required."], "username": ["This field is required."],
+                                                                   "first_name": ["This field is required."],
+                                                                   "username": ["This field is required."],
                                                                    "role": ["This field is required."],
-                                                                   'has_sales_access': ['Select atleast one option.']}}))
+                                                                   'has_sales_access': [
+                                                                       'Select atleast one option.']}}))
 
     def test_user_update_permissions(self):
         self.user_obj = User.objects.create(
@@ -639,7 +643,7 @@ class TestUserUpdate(ObjectsCreation, TestCase):
             'role': 'USER',
             'email': 'jodoe@common.com',
             'has_sales_access': 'true'},
-            HTTP_X_REQUESTED_WITH='XMLHttpRequest')
+                                    HTTP_X_REQUESTED_WITH='XMLHttpRequest')
         self.assertJSONEqual(force_text(response.content),
                              json.dumps({"error_403": True, "error": True}))
 
@@ -650,7 +654,7 @@ class TestUserUpdate(ObjectsCreation, TestCase):
             'role': 'USER',
             'email': 'janeDoeCommon@user.com',
             'has_sales_access': 'true'},
-            HTTP_X_REQUESTED_WITH='XMLHttpRequest')
+                                    HTTP_X_REQUESTED_WITH='XMLHttpRequest')
         self.assertJSONEqual(force_text(response.content),
                              json.dumps({'success_url': reverse('common:profile'), 'error': False}))
 
@@ -731,55 +735,56 @@ class TestUserCreationView(ObjectsCreation, TestCase):
                                     HTTP_X_REQUESTED_WITH='XMLHttpRequest')
         self.assertEqual(force_text(response.content),
                          json.dumps({"error": True, "errors": {"email": ["This field is required."],
-                                    "first_name": ["This field is required."],
-                                    "username": ["This field is required."],
-                                    "role": ["This field is required."],
-                                    "has_sales_access": ["Select atleast one option."],
-                                    "password": ["This field is required."]}}))
+                                                               "first_name": ["This field is required."],
+                                                               "username": ["This field is required."],
+                                                               "role": ["This field is required."],
+                                                               "has_sales_access": ["Select atleast one option."],
+                                                               "password": ["This field is required."]}}))
 
-        response=self.client.post(reverse('common:create_user'), {
+        response = self.client.post(reverse('common:create_user'), {
             'email': 'johndoe@commonUser.com',
             'first_name': 'first name',
             'username': 'joe',
             'role': 'USER',
             'password': 'testpassword',
-            'has_sales_access':'true',
+            'has_sales_access': 'true',
         }, HTTP_X_REQUESTED_WITH='XMLHttpRequest')
         self.assertEqual(force_text(response.content), json.dumps(
             {"success_url": "/users/list/", "error": False}))
 
     def test_add_api_settings(self):
-        response=self.client.post(reverse('common:add_api_settings'), {})
+        response = self.client.post(reverse('common:add_api_settings'), {})
         self.assertTrue('error' in str(response.content))
-        response=self.client.post(reverse('common:add_api_settings'), {
+        response = self.client.post(reverse('common:add_api_settings'), {
             'title': 'api title', 'lead_assigned_to': str(self.user2.id), 'website': 'https://micropyramid.com',
             'tags': 'api_tag, tag1'
         })
         self.assertJSONEqual(force_text(response.content),
                              json.dumps({'success_url': reverse("common:api_settings"), 'error': False}))
 
-        response=self.client.post(reverse('common:add_api_settings'), {
+        response = self.client.post(reverse('common:add_api_settings'), {
             'title': 'api title', 'lead_assigned_to': str(self.user2.id), 'website': 'https://micropyramid.com',
             'tags': 'api_tag, tag1', 'savenewform': 'true'
         })
         self.assertJSONEqual(force_text(response.content),
                              json.dumps({'success_url': reverse("common:add_api_settings"), 'error': False}))
 
-        response=self.client.post(reverse('common:add_api_settings'), {
+        response = self.client.post(reverse('common:add_api_settings'), {
             'title': '', 'lead_assigned_to': str(self.user2.id), 'website': 'micropyramid.com',
             'tags': 'api_tag, tag1', 'savenewform': 'true'
         })
         self.assertJSONEqual(force_text(response.content),
-                             json.dumps({"error": True, "errors": {"title": ["This field is required."], "website": ["Please provide valid schema"]}}))
+                             json.dumps({"error": True, "errors": {"title": ["This field is required."],
+                                                                   "website": ["Please provide valid schema"]}}))
 
     def test_update_api_settings(self):
-        self.api_settings_update=APISettings.objects.create(title='api key update',
+        self.api_settings_update = APISettings.objects.create(title='api key update',
                                                               apikey='asdfasd',
                                                               website='https://example.com')
-        response=self.client.post(
+        response = self.client.post(
             reverse('common:update_api_settings', args=(self.api_settings_update.id,)), {})
         self.assertTrue('error' in str(response.content))
-        response=self.client.post(reverse('common:update_api_settings', args=(self.api_settings_update.id,)), {
+        response = self.client.post(reverse('common:update_api_settings', args=(self.api_settings_update.id,)), {
             'title': 'api key update',
             'apikey': 'asdfasd',
             'website': 'http://example.com',
@@ -787,30 +792,31 @@ class TestUserCreationView(ObjectsCreation, TestCase):
             'tags': 'api_tag_new, tag1'
         })
 
-        response=self.client.post(reverse('common:update_api_settings', args=(self.api_settings_update.id,)), {
+        response = self.client.post(reverse('common:update_api_settings', args=(self.api_settings_update.id,)), {
             'title': 'api title', 'lead_assigned_to': str(self.user2.id), 'website': 'https://micropyramid.com',
             'tags': 'api_tag, tag1', 'savenewform': 'true'
         })
         self.assertJSONEqual(force_text(response.content),
                              json.dumps({'success_url': reverse("common:add_api_settings"), 'error': False}))
 
-        response=self.client.post(reverse('common:update_api_settings', args=(self.api_settings_update.id,)), {
+        response = self.client.post(reverse('common:update_api_settings', args=(self.api_settings_update.id,)), {
             'title': '', 'lead_assigned_to': str(self.user2.id), 'website': 'micropyramid.com',
             'tags': 'api_tag, tag1', 'savenewform': 'true'
         })
         self.assertJSONEqual(force_text(response.content),
-                             json.dumps({"error": True, "errors": {"title": ["This field is required."], "website": ["Please provide valid schema"]}}))
+                             json.dumps({"error": True, "errors": {"title": ["This field is required."],
+                                                                   "website": ["Please provide valid schema"]}}))
 
     def test_document_list_user_view(self):
         self.client.login(username='janeDoeCommon@user.com', password='password')
-        self.document=Document.objects.create(
+        self.document = Document.objects.create(
             title="user 2 doc", document_file="1.png", created_by=self.user2)
         self.document.shared_to.add(self.user2.id)
-        response=self.client.get(reverse('common:doc_list'))
+        response = self.client.get(reverse('common:doc_list'))
         self.assertEqual(200, response.status_code)
 
-        upload_file=open('static/images/user.png', 'rb')
-        response=self.client.post(reverse('common:edit_doc', args=(self.document.id,)), {
+        upload_file = open('static/images/user.png', 'rb')
+        response = self.client.post(reverse('common:edit_doc', args=(self.document.id,)), {
             'title': 'user 2 doc',
             'document_file': SimpleUploadedFile(upload_file.name, upload_file.read()),
             'shared_to': str(self.user2.id)
@@ -822,19 +828,19 @@ class TestUserCreationView(ObjectsCreation, TestCase):
         # response = self.client.get(reverse('common:download_document', args=(self.document.id,)))
         # self.assertEqual(200, response.status_code)
 
-        self.attachment=Attachments.objects.create(
+        self.attachment = Attachments.objects.create(
             attachment=SimpleUploadedFile(upload_file.name, upload_file.read()), created_by=self.user)
-        response=self.client.get(
+        response = self.client.get(
             reverse('common:download_attachment', kwargs=({'pk': self.attachment.id})))
 
     def test_document_update(self):
         self.client.login(username='johnDoeCommon@user.com', password='password')
-        response=self.client.get(
+        response = self.client.get(
             reverse('common:download_document', args=(self.document.id,)))
         self.assertEqual(403, response.status_code)
 
     def test_user_status(self):
-        self.user_status=User.objects.create(
+        self.user_status = User.objects.create(
             first_name="joedoe",
             username='joedoe@commonUser',
             email='joedoe@commonUser.com',
@@ -843,10 +849,9 @@ class TestUserCreationView(ObjectsCreation, TestCase):
         )
         self.user_status.set_password('password')
         self.user_status.save()
-        response=self.client.get(
+        response = self.client.get(
             reverse('common:change_user_status', kwargs={'pk': self.user_status.id}))
         self.assertEqual(302, response.status_code)
-
 
 
 class TestUserAuthorization(ObjectsCreation, TestCase):
@@ -883,80 +888,133 @@ class TestUserFormValidation(ObjectsCreation, TestCase):
 
         data = {'title': 'edit title'}
         response = self.client.post(reverse('common:create_doc'), data)
-        json_response = {"error": True, "errors": {"title": ["Document\u00a0with this Title\u00a0already exists"], "document_file": ["This field is required."]}}
+        json_response = {"error": True, "errors": {"title": ["Document\u00a0with this Title\u00a0already exists"],
+                                                   "document_file": ["This field is required."]}}
         self.assertJSONEqual(force_text(response.content), json.dumps(json_response))
 
     def test_api_setting_form(self):
-        data = {'website' : 'http://localhost:8000'}
+        data = {'website': 'http://localhost:8000'}
         response = self.client.post(reverse('common:add_api_settings'), data)
-        json_response = json.dumps({"error": True, "errors": {"title": ["This field is required."], "website": ["Please provide a valid URL with schema and without trailing slash - Example: http://google.com"]}})
+        json_response = json.dumps({"error": True, "errors": {"title": ["This field is required."], "website": [
+            "Please provide a valid URL with schema and without trailing slash - Example: http://google.com"]}})
         self.assertJSONEqual(force_text(response.content), json_response)
 
     def test_get_complete_address(self):
-
-        Address_obj_street=Address.objects.create(street='street')
-        Address_obj_city=Address.objects.create(city='city')
-        Address_obj_address_line=Address.objects.create(address_line='address_line')
-        Address_obj_state=Address.objects.create(state='state')
-        Address_obj_postcode=Address.objects.create(postcode='postcode')
-        Address_obj_country=Address.objects.create(country='IN')
-        Address_obj_street_city=Address.objects.create(street='street',city='city')
-        Address_obj_street_address_line=Address.objects.create(street='street',address_line='address_line')
-        Address_obj_street_state=Address.objects.create(street='street',state='state')
-        Address_obj_street_postcode=Address.objects.create(street='street',postcode='postcode')
-        Address_obj_street_country=Address.objects.create(street='street',country='IN')
-        Address_obj_city_address_line=Address.objects.create(city='city',address_line='address_line')
-        Address_obj_city_state=Address.objects.create(city='city',state='state')
-        Address_obj_city_postcode=Address.objects.create(city='city',postcode='postcode')
-        Address_obj_city_country=Address.objects.create(city='city',country='IN')
-        Address_obj_address_line_state=Address.objects.create(address_line='address_line',state='state')
-        Address_obj_address_line_postcode=Address.objects.create(address_line='address_line',postcode='postcode')
-        Address_obj_address_line_country=Address.objects.create(address_line='address_line',country='IN')
-        Address_obj_state_postcode=Address.objects.create(state='state',postcode='postcode')
-        Address_obj_state_country=Address.objects.create(state='state',country='IN')
-        Address_obj_postcode_country=Address.objects.create(postcode='postcode',country='IN')
-        Address_obj_street_city_address_line=Address.objects.create(street='street',city='city',address_line='address_line')
-        Address_obj_street_city_state=Address.objects.create(street='street',city='city',state='state')
-        Address_obj_street_city_postcode=Address.objects.create(street='street',city='city',postcode='postcode')
-        Address_obj_street_city_country=Address.objects.create(street='street',city='city',country='IN')
-        Address_obj_street_address_line_state=Address.objects.create(street='street',address_line='address_line',state='state')
-        Address_obj_street_address_line_postcode=Address.objects.create(street='street',address_line='address_line',postcode='postcode')
-        Address_obj_street_address_line_country=Address.objects.create(street='street',address_line='address_line',country='IN')
-        Address_obj_street_state_postcode=Address.objects.create(street='street',state='state',postcode='postcode')
-        Address_obj_street_state_country=Address.objects.create(street='street',state='state',country='IN')
-        Address_obj_street_postcode_country=Address.objects.create(street='street',postcode='postcode',country='IN')
-        Address_obj_city_address_line_state=Address.objects.create(city='city',address_line='address_line',state='state')
-        Address_obj_city_address_line_postcode=Address.objects.create(city='city',address_line='address_line',postcode='postcode')
-        Address_obj_city_address_line_country=Address.objects.create(city='city',address_line='address_line',country='IN')
-        Address_obj_city_state_postcode=Address.objects.create(city='city',state='state',postcode='postcode')
-        Address_obj_city_state_country=Address.objects.create(city='city',state='state',country='IN')
-        Address_obj_city_postcode_country=Address.objects.create(city='city',postcode='postcode',country='IN')
-        Address_obj_address_line_state_postcode=Address.objects.create(address_line='address_line',state='state',postcode='postcode')
-        Address_obj_address_line_state_country=Address.objects.create(address_line='address_line',state='state',country='IN')
-        Address_obj_address_line_postcode_country=Address.objects.create(address_line='address_line',postcode='postcode',country='IN')
-        Address_obj_state_postcode_country=Address.objects.create(state='state',postcode='postcode',country='IN')
-        Address_obj_street_city_address_line_state=Address.objects.create(street='street',city='city',address_line='address_line',state='state')
-        Address_obj_street_city_address_line_postcode=Address.objects.create(street='street',city='city',address_line='address_line',postcode='postcode')
-        Address_obj_street_city_address_line_country=Address.objects.create(street='street',city='city',address_line='address_line',country='IN')
-        Address_obj_street_city_state_postcode=Address.objects.create(street='street',city='city',state='state',postcode='postcode')
-        Address_obj_street_city_state_country=Address.objects.create(street='street',city='city',state='state',country='IN')
-        Address_obj_street_city_postcode_country=Address.objects.create(street='street',city='city',postcode='postcode',country='IN')
-        Address_obj_street_address_line_state_postcode=Address.objects.create(street='street',address_line='address_line',state='state',postcode='postcode')
-        Address_obj_street_address_line_state_country=Address.objects.create(street='street',address_line='address_line',state='state',country='IN')
-        Address_obj_street_address_line_postcode_country=Address.objects.create(street='street',address_line='address_line',postcode='postcode',country='IN')
-        Address_obj_street_state_postcode_country=Address.objects.create(street='street',state='state',postcode='postcode',country='IN')
-        Address_obj_city_address_line_state_postcode=Address.objects.create(city='city',address_line='address_line',state='state',postcode='postcode')
-        Address_obj_city_address_line_state_country=Address.objects.create(city='city',address_line='address_line',state='state',country='IN')
-        Address_obj_city_address_line_postcode_country=Address.objects.create(city='city',address_line='address_line',postcode='postcode',country='IN')
-        Address_obj_city_state_postcode_country=Address.objects.create(city='city',state='state',postcode='postcode',country='IN')
-        Address_obj_address_line_state_postcode_country=Address.objects.create(address_line='address_line',state='state',postcode='postcode',country='IN')
-        Address_obj_street_city_address_line_state_postcode=Address.objects.create(street='street',city='city',address_line='address_line',state='state',postcode='postcode')
-        Address_obj_street_city_address_line_state_country=Address.objects.create(street='street',city='city',address_line='address_line',state='state',country='IN')
-        Address_obj_street_city_address_line_postcode_country=Address.objects.create(street='street',city='city',address_line='address_line',postcode='postcode',country='IN')
-        Address_obj_street_city_state_postcode_country=Address.objects.create(street='street',city='city',state='state',postcode='postcode',country='IN')
-        Address_obj_street_address_line_state_postcode_country=Address.objects.create(street='street',address_line='address_line',state='state',postcode='postcode',country='IN')
-        Address_obj_city_address_line_state_postcode_country=Address.objects.create(city='city',address_line='address_line',state='state',postcode='postcode',country='IN')
-        Address_obj_street_city_address_line_state_postcode_country=Address.objects.create(street='street',city='city',address_line='address_line',state='state',postcode='postcode',country='IN')
+        Address_obj_street = Address.objects.create(street='street')
+        Address_obj_city = Address.objects.create(city='city')
+        Address_obj_address_line = Address.objects.create(address_line='address_line')
+        Address_obj_state = Address.objects.create(state='state')
+        Address_obj_postcode = Address.objects.create(postcode='postcode')
+        Address_obj_country = Address.objects.create(country='IN')
+        Address_obj_street_city = Address.objects.create(street='street', city='city')
+        Address_obj_street_address_line = Address.objects.create(street='street', address_line='address_line')
+        Address_obj_street_state = Address.objects.create(street='street', state='state')
+        Address_obj_street_postcode = Address.objects.create(street='street', postcode='postcode')
+        Address_obj_street_country = Address.objects.create(street='street', country='IN')
+        Address_obj_city_address_line = Address.objects.create(city='city', address_line='address_line')
+        Address_obj_city_state = Address.objects.create(city='city', state='state')
+        Address_obj_city_postcode = Address.objects.create(city='city', postcode='postcode')
+        Address_obj_city_country = Address.objects.create(city='city', country='IN')
+        Address_obj_address_line_state = Address.objects.create(address_line='address_line', state='state')
+        Address_obj_address_line_postcode = Address.objects.create(address_line='address_line', postcode='postcode')
+        Address_obj_address_line_country = Address.objects.create(address_line='address_line', country='IN')
+        Address_obj_state_postcode = Address.objects.create(state='state', postcode='postcode')
+        Address_obj_state_country = Address.objects.create(state='state', country='IN')
+        Address_obj_postcode_country = Address.objects.create(postcode='postcode', country='IN')
+        Address_obj_street_city_address_line = Address.objects.create(street='street', city='city',
+                                                                      address_line='address_line')
+        Address_obj_street_city_state = Address.objects.create(street='street', city='city', state='state')
+        Address_obj_street_city_postcode = Address.objects.create(street='street', city='city', postcode='postcode')
+        Address_obj_street_city_country = Address.objects.create(street='street', city='city', country='IN')
+        Address_obj_street_address_line_state = Address.objects.create(street='street', address_line='address_line',
+                                                                       state='state')
+        Address_obj_street_address_line_postcode = Address.objects.create(street='street', address_line='address_line',
+                                                                          postcode='postcode')
+        Address_obj_street_address_line_country = Address.objects.create(street='street', address_line='address_line',
+                                                                         country='IN')
+        Address_obj_street_state_postcode = Address.objects.create(street='street', state='state', postcode='postcode')
+        Address_obj_street_state_country = Address.objects.create(street='street', state='state', country='IN')
+        Address_obj_street_postcode_country = Address.objects.create(street='street', postcode='postcode', country='IN')
+        Address_obj_city_address_line_state = Address.objects.create(city='city', address_line='address_line',
+                                                                     state='state')
+        Address_obj_city_address_line_postcode = Address.objects.create(city='city', address_line='address_line',
+                                                                        postcode='postcode')
+        Address_obj_city_address_line_country = Address.objects.create(city='city', address_line='address_line',
+                                                                       country='IN')
+        Address_obj_city_state_postcode = Address.objects.create(city='city', state='state', postcode='postcode')
+        Address_obj_city_state_country = Address.objects.create(city='city', state='state', country='IN')
+        Address_obj_city_postcode_country = Address.objects.create(city='city', postcode='postcode', country='IN')
+        Address_obj_address_line_state_postcode = Address.objects.create(address_line='address_line', state='state',
+                                                                         postcode='postcode')
+        Address_obj_address_line_state_country = Address.objects.create(address_line='address_line', state='state',
+                                                                        country='IN')
+        Address_obj_address_line_postcode_country = Address.objects.create(address_line='address_line',
+                                                                           postcode='postcode', country='IN')
+        Address_obj_state_postcode_country = Address.objects.create(state='state', postcode='postcode', country='IN')
+        Address_obj_street_city_address_line_state = Address.objects.create(street='street', city='city',
+                                                                            address_line='address_line', state='state')
+        Address_obj_street_city_address_line_postcode = Address.objects.create(street='street', city='city',
+                                                                               address_line='address_line',
+                                                                               postcode='postcode')
+        Address_obj_street_city_address_line_country = Address.objects.create(street='street', city='city',
+                                                                              address_line='address_line', country='IN')
+        Address_obj_street_city_state_postcode = Address.objects.create(street='street', city='city', state='state',
+                                                                        postcode='postcode')
+        Address_obj_street_city_state_country = Address.objects.create(street='street', city='city', state='state',
+                                                                       country='IN')
+        Address_obj_street_city_postcode_country = Address.objects.create(street='street', city='city',
+                                                                          postcode='postcode', country='IN')
+        Address_obj_street_address_line_state_postcode = Address.objects.create(street='street',
+                                                                                address_line='address_line',
+                                                                                state='state', postcode='postcode')
+        Address_obj_street_address_line_state_country = Address.objects.create(street='street',
+                                                                               address_line='address_line',
+                                                                               state='state', country='IN')
+        Address_obj_street_address_line_postcode_country = Address.objects.create(street='street',
+                                                                                  address_line='address_line',
+                                                                                  postcode='postcode', country='IN')
+        Address_obj_street_state_postcode_country = Address.objects.create(street='street', state='state',
+                                                                           postcode='postcode', country='IN')
+        Address_obj_city_address_line_state_postcode = Address.objects.create(city='city', address_line='address_line',
+                                                                              state='state', postcode='postcode')
+        Address_obj_city_address_line_state_country = Address.objects.create(city='city', address_line='address_line',
+                                                                             state='state', country='IN')
+        Address_obj_city_address_line_postcode_country = Address.objects.create(city='city',
+                                                                                address_line='address_line',
+                                                                                postcode='postcode', country='IN')
+        Address_obj_city_state_postcode_country = Address.objects.create(city='city', state='state',
+                                                                         postcode='postcode', country='IN')
+        Address_obj_address_line_state_postcode_country = Address.objects.create(address_line='address_line',
+                                                                                 state='state', postcode='postcode',
+                                                                                 country='IN')
+        Address_obj_street_city_address_line_state_postcode = Address.objects.create(street='street', city='city',
+                                                                                     address_line='address_line',
+                                                                                     state='state', postcode='postcode')
+        Address_obj_street_city_address_line_state_country = Address.objects.create(street='street', city='city',
+                                                                                    address_line='address_line',
+                                                                                    state='state', country='IN')
+        Address_obj_street_city_address_line_postcode_country = Address.objects.create(street='street', city='city',
+                                                                                       address_line='address_line',
+                                                                                       postcode='postcode',
+                                                                                       country='IN')
+        Address_obj_street_city_state_postcode_country = Address.objects.create(street='street', city='city',
+                                                                                state='state', postcode='postcode',
+                                                                                country='IN')
+        Address_obj_street_address_line_state_postcode_country = Address.objects.create(street='street',
+                                                                                        address_line='address_line',
+                                                                                        state='state',
+                                                                                        postcode='postcode',
+                                                                                        country='IN')
+        Address_obj_city_address_line_state_postcode_country = Address.objects.create(city='city',
+                                                                                      address_line='address_line',
+                                                                                      state='state',
+                                                                                      postcode='postcode', country='IN')
+        Address_obj_street_city_address_line_state_postcode_country = Address.objects.create(street='street',
+                                                                                             city='city',
+                                                                                             address_line='address_line',
+                                                                                             state='state',
+                                                                                             postcode='postcode',
+                                                                                             country='IN')
 
         self.assertEqual(Address_obj_street.get_complete_address(), "street")
         self.assertEqual(Address_obj_city.get_complete_address(), "city")
@@ -984,7 +1042,8 @@ class TestUserFormValidation(ObjectsCreation, TestCase):
         self.assertEqual(Address_obj_street_city_postcode.get_complete_address(), "street, city, postcode")
         self.assertEqual(Address_obj_street_city_country.get_complete_address(), "street, city, India")
         self.assertEqual(Address_obj_street_address_line_state.get_complete_address(), "address_line, street, state")
-        self.assertEqual(Address_obj_street_address_line_postcode.get_complete_address(), "address_line, street, postcode")
+        self.assertEqual(Address_obj_street_address_line_postcode.get_complete_address(),
+                         "address_line, street, postcode")
         self.assertEqual(Address_obj_street_address_line_country.get_complete_address(), "address_line, street, India")
         self.assertEqual(Address_obj_street_state_postcode.get_complete_address(), "street, state, postcode")
         self.assertEqual(Address_obj_street_state_country.get_complete_address(), "street, state, India")
@@ -995,49 +1054,71 @@ class TestUserFormValidation(ObjectsCreation, TestCase):
         self.assertEqual(Address_obj_city_state_postcode.get_complete_address(), "city, state, postcode")
         self.assertEqual(Address_obj_city_state_country.get_complete_address(), "city, state, India")
         self.assertEqual(Address_obj_city_postcode_country.get_complete_address(), "city, postcode, India")
-        self.assertEqual(Address_obj_address_line_state_postcode.get_complete_address(), "address_line, state, postcode")
+        self.assertEqual(Address_obj_address_line_state_postcode.get_complete_address(),
+                         "address_line, state, postcode")
         self.assertEqual(Address_obj_address_line_state_country.get_complete_address(), "address_line, state, India")
-        self.assertEqual(Address_obj_address_line_postcode_country.get_complete_address(), "address_line, postcode, India")
+        self.assertEqual(Address_obj_address_line_postcode_country.get_complete_address(),
+                         "address_line, postcode, India")
         self.assertEqual(Address_obj_state_postcode_country.get_complete_address(), "state, postcode, India")
-        self.assertEqual(Address_obj_street_city_address_line_state.get_complete_address(), "address_line, street, city, state")
-        self.assertEqual(Address_obj_street_city_address_line_postcode.get_complete_address(), "address_line, street, city, postcode")
-        self.assertEqual(Address_obj_street_city_address_line_country.get_complete_address(), "address_line, street, city, India")
+        self.assertEqual(Address_obj_street_city_address_line_state.get_complete_address(),
+                         "address_line, street, city, state")
+        self.assertEqual(Address_obj_street_city_address_line_postcode.get_complete_address(),
+                         "address_line, street, city, postcode")
+        self.assertEqual(Address_obj_street_city_address_line_country.get_complete_address(),
+                         "address_line, street, city, India")
         self.assertEqual(Address_obj_street_city_state_postcode.get_complete_address(), "street, city, state, postcode")
         self.assertEqual(Address_obj_street_city_state_country.get_complete_address(), "street, city, state, India")
-        self.assertEqual(Address_obj_street_city_postcode_country.get_complete_address(), "street, city, postcode, India")
-        self.assertEqual(Address_obj_street_address_line_state_postcode.get_complete_address(), "address_line, street, state, postcode")
-        self.assertEqual(Address_obj_street_address_line_state_country.get_complete_address(), "address_line, street, state, India")
-        self.assertEqual(Address_obj_street_address_line_postcode_country.get_complete_address(), "address_line, street, postcode, India")
-        self.assertEqual(Address_obj_street_state_postcode_country.get_complete_address(), "street, state, postcode, India")
-        self.assertEqual(Address_obj_city_address_line_state_postcode.get_complete_address(), "address_line, city, state, postcode")
-        self.assertEqual(Address_obj_city_address_line_state_country.get_complete_address(), "address_line, city, state, India")
-        self.assertEqual(Address_obj_city_address_line_postcode_country.get_complete_address(), "address_line, city, postcode, India")
+        self.assertEqual(Address_obj_street_city_postcode_country.get_complete_address(),
+                         "street, city, postcode, India")
+        self.assertEqual(Address_obj_street_address_line_state_postcode.get_complete_address(),
+                         "address_line, street, state, postcode")
+        self.assertEqual(Address_obj_street_address_line_state_country.get_complete_address(),
+                         "address_line, street, state, India")
+        self.assertEqual(Address_obj_street_address_line_postcode_country.get_complete_address(),
+                         "address_line, street, postcode, India")
+        self.assertEqual(Address_obj_street_state_postcode_country.get_complete_address(),
+                         "street, state, postcode, India")
+        self.assertEqual(Address_obj_city_address_line_state_postcode.get_complete_address(),
+                         "address_line, city, state, postcode")
+        self.assertEqual(Address_obj_city_address_line_state_country.get_complete_address(),
+                         "address_line, city, state, India")
+        self.assertEqual(Address_obj_city_address_line_postcode_country.get_complete_address(),
+                         "address_line, city, postcode, India")
         self.assertEqual(Address_obj_city_state_postcode_country.get_complete_address(), "city, state, postcode, India")
-        self.assertEqual(Address_obj_address_line_state_postcode_country.get_complete_address(), "address_line, state, postcode, India")
-        self.assertEqual(Address_obj_street_city_address_line_state_postcode.get_complete_address(), "address_line, street, city, state, postcode")
-        self.assertEqual(Address_obj_street_city_address_line_state_country.get_complete_address(), "address_line, street, city, state, India")
-        self.assertEqual(Address_obj_street_city_address_line_postcode_country.get_complete_address(), "address_line, street, city, postcode, India")
-        self.assertEqual(Address_obj_street_city_state_postcode_country.get_complete_address(), "street, city, state, postcode, India")
-        self.assertEqual(Address_obj_street_address_line_state_postcode_country.get_complete_address(), "address_line, street, state, postcode, India")
-        self.assertEqual(Address_obj_city_address_line_state_postcode_country.get_complete_address(), "address_line, city, state, postcode, India")
-        self.assertEqual(Address_obj_street_city_address_line_state_postcode_country.get_complete_address(), "address_line, street, city, state, postcode, India")
+        self.assertEqual(Address_obj_address_line_state_postcode_country.get_complete_address(),
+                         "address_line, state, postcode, India")
+        self.assertEqual(Address_obj_street_city_address_line_state_postcode.get_complete_address(),
+                         "address_line, street, city, state, postcode")
+        self.assertEqual(Address_obj_street_city_address_line_state_country.get_complete_address(),
+                         "address_line, street, city, state, India")
+        self.assertEqual(Address_obj_street_city_address_line_postcode_country.get_complete_address(),
+                         "address_line, street, city, postcode, India")
+        self.assertEqual(Address_obj_street_city_state_postcode_country.get_complete_address(),
+                         "street, city, state, postcode, India")
+        self.assertEqual(Address_obj_street_address_line_state_postcode_country.get_complete_address(),
+                         "address_line, street, state, postcode, India")
+        self.assertEqual(Address_obj_city_address_line_state_postcode_country.get_complete_address(),
+                         "address_line, city, state, postcode, India")
+        self.assertEqual(Address_obj_street_city_address_line_state_postcode_country.get_complete_address(),
+                         "address_line, street, city, state, postcode, India")
 
         self.assertEqual(str(Address_obj_street), "")
         self.assertEqual(str(Address_obj_city), "city")
 
     def test_file_extensions_classes(self):
-        doc_mp3=Attachments.objects.create(file_name="file_mp3",attachment="file.mp3")
-        doc_mp4=Attachments.objects.create(file_name="file_mp4",attachment="file.mp4")
-        doc_png=Attachments.objects.create(file_name="file_png",attachment="file.png")
-        doc_pdf=Attachments.objects.create(file_name="file_pdf",attachment="file.pdf")
-        doc_json=Attachments.objects.create(file_name="file_json",attachment="file.json")
-        doc_txt=Attachments.objects.create(file_name="file_txt",attachment="file.txt")
-        doc_csv=Attachments.objects.create(file_name="file_csv",attachment="file.csv")
-        doc_zip=Attachments.objects.create(file_name="file_zip",attachment="file.zip")
-        doc_unknown_extension=Attachments.objects.create(file_name="file_unknown_extension",attachment="file.unknown_extension")
-        doc_without_extension=Attachments.objects.create(file_name="file_unknown_extension",attachment="file_without_extension")
-        doc_without_attachment=Attachments.objects.create(file_name="file_unknown_extension")
-
+        doc_mp3 = Attachments.objects.create(file_name="file_mp3", attachment="file.mp3")
+        doc_mp4 = Attachments.objects.create(file_name="file_mp4", attachment="file.mp4")
+        doc_png = Attachments.objects.create(file_name="file_png", attachment="file.png")
+        doc_pdf = Attachments.objects.create(file_name="file_pdf", attachment="file.pdf")
+        doc_json = Attachments.objects.create(file_name="file_json", attachment="file.json")
+        doc_txt = Attachments.objects.create(file_name="file_txt", attachment="file.txt")
+        doc_csv = Attachments.objects.create(file_name="file_csv", attachment="file.csv")
+        doc_zip = Attachments.objects.create(file_name="file_zip", attachment="file.zip")
+        doc_unknown_extension = Attachments.objects.create(file_name="file_unknown_extension",
+                                                           attachment="file.unknown_extension")
+        doc_without_extension = Attachments.objects.create(file_name="file_unknown_extension",
+                                                           attachment="file_without_extension")
+        doc_without_attachment = Attachments.objects.create(file_name="file_unknown_extension")
 
         self.assertEqual(doc_mp3.file_type(), ('audio', 'fa fa-file-audio'))
         self.assertEqual(doc_mp4.file_type(), ('video', 'fa fa-file-video'))
@@ -1063,7 +1144,7 @@ class TestUserFormValidation(ObjectsCreation, TestCase):
         date = datetime.datetime.today() + datetime.timedelta(days=-2)
         self.comment = Comment.objects.create(
             comment='comment', user=self.user,
-            commented_by=self.user, commented_on = date
+            commented_by=self.user, commented_on=date
         )
         self.assertTrue(self.comment.commented_on_arrow in ['just now', 'seconds ago'])
 
@@ -1084,12 +1165,11 @@ class TestViewFunctions(ObjectsCreation, TestCase):
         response = self.client.get(reverse('common:change_password'))
         self.assertEqual(200, response.status_code)
 
-
         self.client.logout()
         response = self.client.get(reverse('common:login'))
         self.assertEqual(200, response.status_code)
 
-        data = {'email' : 'janeDoeCommon@user.com', 'password' : 'password'}
+        data = {'email': 'janeDoeCommon@user.com', 'password': 'password'}
         response = self.client.post(reverse('common:login'), data)
         self.assertEqual(302, response.status_code)
 
@@ -1108,17 +1188,17 @@ class TestViewFunctions(ObjectsCreation, TestCase):
 
         self.user_marketing.is_active = False
         self.user_marketing.save()
-        data = {'email' : 'johnDoeCommonMarketing@user.com', 'password' : 'password'}
+        data = {'email': 'johnDoeCommonMarketing@user.com', 'password': 'password'}
         response = self.client.post(reverse('common:login'), data)
         self.assertEqual(200, response.status_code)
 
-        data = {'email' : 'invalid@account.com', 'password' : 'password'}
+        data = {'email': 'invalid@account.com', 'password': 'password'}
         response = self.client.post(reverse('common:login'), data)
         self.assertEqual(200, response.status_code)
 
     def test_user_list(self):
         self.client.login(username='johndoe@admin.com', password='password')
-        response = self.client.post(reverse('common:users_list'), data={'role':'USER'})
+        response = self.client.post(reverse('common:users_list'), data={'role': 'USER'})
         self.assertEqual(200, response.status_code)
 
     def test_user_create_with_team(self):
@@ -1130,8 +1210,8 @@ class TestViewFunctions(ObjectsCreation, TestCase):
             'last_name': 'dev',
             'username': 'john@developer.com',
             'password': 'password',
-            'role': 'USER', 'teams':[self.team_dev.id,],
-            'has_sales_access':'on'}, HTTP_X_REQUESTED_WITH='XMLHttpRequest')
+            'role': 'USER', 'teams': [self.team_dev.id, ],
+            'has_sales_access': 'on'}, HTTP_X_REQUESTED_WITH='XMLHttpRequest')
         self.assertEqual(response.status_code, 200)
         # response = self.client.post('/users/create/', {
         #     'email': 'jane@developer.com',
@@ -1160,19 +1240,18 @@ class TestViewFunctions(ObjectsCreation, TestCase):
             'last_name': 'dev',
             'username': 'john@developer.com',
             'password': 'password',
-            'role': 'USER', 'teams':[self.team_test.id,],
-            'has_sales_access':'on'}, HTTP_X_REQUESTED_WITH='XMLHttpRequest')
+            'role': 'USER', 'teams': [self.team_test.id, ],
+            'has_sales_access': 'on'}, HTTP_X_REQUESTED_WITH='XMLHttpRequest')
         self.assertEqual(response.status_code, 200)
-
 
     def test_admin_profile_edit(self):
         self.client.login(username='johndoe@admin.com', password='password')
         user_edit_url = reverse('common:edit_user', args=(self.user_admin.id,))
         response = self.client.post(user_edit_url, {
-        'email': 'johndoe@admin.com',
-        'first_name': 'john',
-        'username': 'johndoeAdmin',
-        'role': 'ADMIN'}, HTTP_X_REQUESTED_WITH='XMLHttpRequest')
+            'email': 'johndoe@admin.com',
+            'first_name': 'john',
+            'username': 'johndoeAdmin',
+            'role': 'ADMIN'}, HTTP_X_REQUESTED_WITH='XMLHttpRequest')
         self.assertEqual(response.status_code, 200)
 
     def test_doc_create(self):
@@ -1186,8 +1265,8 @@ class TestViewFunctions(ObjectsCreation, TestCase):
         upload_file = open('static/images/user.png', 'rb')
         shared_user = User.objects.filter(email='johndoe@admin.com').first()
         data = {
-            'title':"new doc", 'document_file': SimpleUploadedFile(upload_file.name, upload_file.read()),
-            'teams':[self.team_test.id, ],
+            'title': "new doc", 'document_file': SimpleUploadedFile(upload_file.name, upload_file.read()),
+            'teams': [self.team_test.id, ],
             'shared_to': [shared_user.id, ]
         }
         response = self.client.post(reverse('common:create_doc'), data, HTTP_X_REQUESTED_WITH='XMLHttpRequest')
@@ -1195,11 +1274,12 @@ class TestViewFunctions(ObjectsCreation, TestCase):
 
         upload_file = open('static/images/user.png', 'rb')
         data = {
-            'title':"another new doc", 'document_file': SimpleUploadedFile(upload_file.name, upload_file.read()),
-            'teams':[self.team_test.id, ],
+            'title': "another new doc", 'document_file': SimpleUploadedFile(upload_file.name, upload_file.read()),
+            'teams': [self.team_test.id, ],
             'shared_to': [shared_user.id, ]
         }
-        response = self.client.post(reverse('common:edit_doc', args=(self.document.id,)), data, HTTP_X_REQUESTED_WITH='XMLHttpRequest')
+        response = self.client.post(reverse('common:edit_doc', args=(self.document.id,)), data,
+                                    HTTP_X_REQUESTED_WITH='XMLHttpRequest')
         self.assertEqual(response.status_code, 200)
 
         response = self.client.get(reverse('common:download_document', args=(self.document.id,)))

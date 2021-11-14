@@ -4,7 +4,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ('teams', '0003_auto_20190909_1621'),
         ('common', '0017_auto_20190722_1443'),

@@ -2,13 +2,11 @@ from django.contrib.contenttypes.models import ContentType
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import TestCase
 from django.urls import reverse
-from django.utils.encoding import force_text
 
 from accounts.models import Account
 from cases.models import Case
 from common.models import Address, Attachments, Comment, User
 from contacts.models import Contact
-from planner.models import Event, Reminder
 from teams.models import Teams
 
 
@@ -227,7 +225,6 @@ class CaseFormTestCase(CaseCreation, TestCase):
             '/cases/comment/add/', {'caseid': self.case.id, 'comment': 'comment'})
         self.assertEqual(response.status_code, 200)
 
-
     def test_comment_edit(self):
         response = self.client.post(
             '/cases/comment/edit/', {'commentid': self.comment.id})
@@ -278,21 +275,20 @@ class SelectViewTestCase(CaseCreation, TestCase):
 class TestCasesListViewForUser(CaseCreation, TestCase):
 
     def test_queryset_for_user(self):
-
         self.usermp = User.objects.create(
-                        first_name="jane",
-                        username='janeDoe@user.com',
-                        email='janeDoe@user.com',
-                        role="USER",
-                        has_sales_access=True)
+            first_name="jane",
+            username='janeDoe@user.com',
+            email='janeDoe@user.com',
+            role="USER",
+            has_sales_access=True)
         self.usermp.set_password('password')
         self.usermp.save()
 
         self.usermp1 = User.objects.create(
-                        first_name="john",
-                        username='johnDoe@user.com',
-                        email='johnDoe@user.com',
-                        role="USER")
+            first_name="john",
+            username='johnDoe@user.com',
+            email='johnDoe@user.com',
+            role="USER")
         self.usermp1.set_password('password')
         self.usermp1.save()
 
@@ -302,40 +298,38 @@ class TestCasesListViewForUser(CaseCreation, TestCase):
         )
 
         self.account_mp = Account.objects.create(
-                            name="account name", email="johndoe@account.com", phone="911234567892",
-                            billing_address_line="", billing_street="street name",
-                            billing_city="city name",
-                            billing_state="state name", billing_postcode="1234",
-                            billing_country="IN",
-                            website="www.example.com", created_by=self.usermp, status="open",
-                            industry="SOFTWARE", description="test description")
+            name="account name", email="johndoe@account.com", phone="911234567892",
+            billing_address_line="", billing_street="street name",
+            billing_city="city name",
+            billing_state="state name", billing_postcode="1234",
+            billing_country="IN",
+            website="www.example.com", created_by=self.usermp, status="open",
+            industry="SOFTWARE", description="test description")
         self.case_user = Case.objects.create(
-                            name="case name", case_type="Problem", status="New",
-                            account=self.account_mp,
-                            priority="Low", description="something",
-                            created_by=self.usermp, closed_on="2016-05-04")
+            name="case name", case_type="Problem", status="New",
+            account=self.account_mp,
+            priority="Low", description="something",
+            created_by=self.usermp, closed_on="2016-05-04")
         self.client.login(email='janeDoe@user.com', password='password')
         response = self.client.get(reverse('cases:list'))
         self.assertEqual(response.status_code, 200)
 
-
         self.address = Address.objects.create(
-                        street="street name",
-                        city="city",
-                        state="state",
-                        postcode=1234, country="AD")
+            street="street name",
+            city="city",
+            state="state",
+            postcode=1234, country="AD")
 
         self.contact_mp = Contact.objects.create(
-                            first_name="jane doe",
-                            email="janeDoe@contact.com",
-                            address=self.address,
-                            description="contact",
-                            created_by=self.usermp)
+            first_name="jane doe",
+            email="janeDoe@contact.com",
+            address=self.address,
+            description="contact",
+            created_by=self.usermp)
         self.contact_mp.assigned_to.add(self.usermp)
 
         response = self.client.get(reverse('cases:add_case'))
         self.assertEqual(response.status_code, 200)
-
 
     def test_create_case(self):
         upload_file = open('static/images/user.png', 'rb')
@@ -346,16 +340,16 @@ class TestCasesListViewForUser(CaseCreation, TestCase):
             'contacts': str(self.contacts.id),
             'case_attachment': SimpleUploadedFile(
                 upload_file.name, upload_file.read()),
-            'savenewform':True
+            'savenewform': True
         })
         self.assertEqual(response.status_code, 200)
 
     def test_case_detail_view_error(self):
         self.usermp1 = User.objects.create(
-                        first_name="joe doe",
-                        username='joedoe',
-                        email='joeDoeCase@user.com',
-                        role="USER")
+            first_name="joe doe",
+            username='joedoe',
+            email='joeDoeCase@user.com',
+            role="USER")
         self.usermp1.set_password('password')
         self.usermp1.save()
         self.client.login(email='joeDoeCase@user.com', password='password')
@@ -387,22 +381,20 @@ class TestCasesListViewForUser(CaseCreation, TestCase):
     #     self.assertEqual(200, response.status_code)
 
     def test_case_update_test(self):
-
         response = self.client.post(reverse('cases:edit_case', args=(self.case.id,)), {
-            'name':'some case',
-            'status':'New',
-            'priority':'Low',
-            'closed_on':'2019-03-14'
-            })
+            'name': 'some case',
+            'status': 'New',
+            'priority': 'Low',
+            'closed_on': '2019-03-14'
+        })
         self.assertEqual(response.status_code, 200)
 
     def test_permissions(self):
-
         self.user = User.objects.create(
-                        first_name="joedoe",
-                        username='joedoeCase6@user.com',
-                        email='joedoeCase6@user.com',
-                        role="USER")
+            first_name="joedoe",
+            username='joedoeCase6@user.com',
+            email='joedoeCase6@user.com',
+            role="USER")
         self.user.set_password('password')
         self.user.save()
 
@@ -412,29 +404,29 @@ class TestCasesListViewForUser(CaseCreation, TestCase):
             created_by=self.user, closed_on="2016-05-04")
 
         self.usermp = User.objects.create(
-                        first_name="joedoe",
-                        username='joedoeCase7@user.com',
-                        email='joedoeCase7@user.com',
-                        role="USER")
+            first_name="joedoe",
+            username='joedoeCase7@user.com',
+            email='joedoeCase7@user.com',
+            role="USER")
         self.usermp.set_password('password')
         self.usermp.save()
         self.client.login(username='joedoeCase7@user.com', password='password')
         response = self.client.get(reverse('cases:edit_case', args=(self.case_new.id,)), {
-            'name':'some case',
-            'status':'New',
-            'priority':'Low',
-            'closed_on':'2019-03-14'
-            })
+            'name': 'some case',
+            'status': 'New',
+            'priority': 'Low',
+            'closed_on': '2019-03-14'
+        })
         self.assertEqual(response.status_code, 403)
 
         response = self.client.get(reverse('cases:remove_case', args=(self.case.id,)))
         self.assertEqual(response.status_code, 403)
 
         response = self.client.post(reverse('cases:remove_case', args=(self.case.id,)),
-            {'case_id':self.case_new.id})
+                                    {'case_id': self.case_new.id})
         self.assertEqual(response.status_code, 403)
 
-        response = self.client.post(reverse('cases:close_case'), {'case_id':self.case.id})
+        response = self.client.post(reverse('cases:close_case'), {'case_id': self.case.id})
         self.assertEqual(response.status_code, 403)
 
         self.client.login(email='johnDoeCase@example.com', password='password')
@@ -443,18 +435,17 @@ class TestCasesListViewForUser(CaseCreation, TestCase):
         self.team_case.users.add(self.user1.id)
 
         response = self.client.post(reverse('cases:add_case') + '?view_account={}'.format(self.account.id), {
-            'name':'team case',
-            'status':'New',
-            'priority':'Low',
-            'closed_on':'2019-03-14',
-            'teams':self.team_case.id,
-            'from_account':self.account.id
-            })
+            'name': 'team case',
+            'status': 'New',
+            'priority': 'Low',
+            'closed_on': '2019-03-14',
+            'teams': self.team_case.id,
+            'from_account': self.account.id
+        })
         self.assertEqual(200, response.status_code)
 
         response = self.client.get(reverse('cases:add_case') + '?view_account={}'.format(self.account.id))
         self.assertEqual(200, response.status_code)
-
 
         self.case_without_account = Case.objects.create(
             name="case_without_account", case_type="Problem", status="New",
@@ -506,16 +497,18 @@ class TestCasesListViewForUser(CaseCreation, TestCase):
 
         self.client.login(email='johnDoeCase@example.com', password='password')
         data = {
-            'name':"case user", 'case_type':"Problem", 'status':"New",
-            'priority':"Low", 'description':"something",
-            'created_by':self.usermp, 'closed_on':"2016-05-04",
+            'name': "case user", 'case_type': "Problem", 'status': "New",
+            'priority': "Low", 'description': "something",
+            'created_by': self.usermp, 'closed_on': "2016-05-04",
             'teams': self.team_case.id,
-            'from_account':self.account.id,
+            'from_account': self.account.id,
         }
-        response = self.client.post(reverse('cases:edit_case', args=(self.case_user.id,)), data, HTTP_X_REQUESTED_WITH='XMLHttpRequest')
+        response = self.client.post(reverse('cases:edit_case', args=(self.case_user.id,)), data,
+                                    HTTP_X_REQUESTED_WITH='XMLHttpRequest')
         self.assertEqual(200, response.status_code)
 
-        response = self.client.get(reverse('cases:edit_case', args=(self.case_user.id,)) + '?view_account={}'.format(self.account.id))
+        response = self.client.get(
+            reverse('cases:edit_case', args=(self.case_user.id,)) + '?view_account={}'.format(self.account.id))
         self.assertEqual(200, response.status_code)
 
         self.client.logout()
@@ -523,12 +516,14 @@ class TestCasesListViewForUser(CaseCreation, TestCase):
         response = self.client.get(reverse('cases:edit_case', args=(self.case.id,)))
         self.assertEqual(403, response.status_code)
 
-        response = self.client.get(reverse('cases:remove_case', args=(self.case_user_1.id,)) + '?view_account={}'.format(self.account.id))
+        response = self.client.get(
+            reverse('cases:remove_case', args=(self.case_user_1.id,)) + '?view_account={}'.format(self.account.id))
         self.assertEqual(403, response.status_code)
 
         self.client.logout()
         self.client.login(email='johnDoeCase@example.com', password='password')
-        response = self.client.get(reverse('cases:remove_case', args=(self.case_user.id,)) + '?view_account={}'.format(self.account.id))
+        response = self.client.get(
+            reverse('cases:remove_case', args=(self.case_user.id,)) + '?view_account={}'.format(self.account.id))
         self.assertEqual(302, response.status_code)
 
         self.case_user = Case.objects.create(
@@ -538,7 +533,8 @@ class TestCasesListViewForUser(CaseCreation, TestCase):
             created_by=self.usermp, closed_on="2016-05-04")
         self.client.logout()
         self.client.login(email='johnDoeCase@example.com', password='password')
-        response = self.client.post(reverse('cases:remove_case', args=(self.case_user.id,)) + '?view_account={}'.format(self.account.id),
+        response = self.client.post(
+            reverse('cases:remove_case', args=(self.case_user.id,)) + '?view_account={}'.format(self.account.id),
             {'case_id': self.case_user.id}, HTTP_X_REQUESTED_WITH='XMLHttpRequest')
         self.assertEqual(200, response.status_code)
 
@@ -550,12 +546,13 @@ class TestCasesListViewForUser(CaseCreation, TestCase):
 
         self.client.logout()
         self.client.login(username='joedoeCase7@user.com', password='password')
-        response = self.client.post(reverse('cases:remove_case', args=(self.case.id,)) + '?view_account={}'.format(self.account.id),
+        response = self.client.post(
+            reverse('cases:remove_case', args=(self.case.id,)) + '?view_account={}'.format(self.account.id),
             {'case_id': self.case.id})
         self.assertEqual(403, response.status_code)
 
         data = {
-            'comment':'comment update',
+            'comment': 'comment update',
             'caseid': self.case.id,
             'commentid': self.comment.id
         }
@@ -564,7 +561,7 @@ class TestCasesListViewForUser(CaseCreation, TestCase):
         self.assertEqual(200, response.status_code)
 
         response = self.client.post(reverse('cases:close_case') + '?view_account={}'.format(self.account.id),
-            {'case_id': self.case.id})
+                                    {'case_id': self.case.id})
         self.assertEqual(403, response.status_code)
         data = {
             'caseid': self.case.id,
@@ -585,9 +582,8 @@ class TestCasesListViewForUser(CaseCreation, TestCase):
         response = self.client.post(reverse('cases:add_comment'), data)
         self.assertEqual(200, response.status_code)
 
-
         data = {
-            'comment':'comment update',
+            'comment': 'comment update',
             'caseid': self.case.id,
             'commentid': self.comment.id
         }
@@ -596,7 +592,7 @@ class TestCasesListViewForUser(CaseCreation, TestCase):
         self.assertEqual(200, response.status_code)
 
         data = {
-            'comment':'',
+            'comment': '',
             'caseid': self.case.id,
             'commentid': self.comment.id
         }
@@ -612,16 +608,14 @@ class TestCasesListViewForUser(CaseCreation, TestCase):
         response = self.client.post(reverse('cases:remove_comment'), data)
         self.assertEqual(200, response.status_code)
 
-
         self.client.logout()
         self.client.login(email='johnDoeCase@example.com', password='password')
         data = {
             'caseid': self.case.id,
-            'attachment':'',
+            'attachment': '',
         }
         response = self.client.post(reverse('cases:add_attachment'), data)
         self.assertEqual(200, response.status_code)
-
 
     # def test_comment_add_error(self):
     #     self.client.login(email='mpmp@micropyramid.com', password='mp')

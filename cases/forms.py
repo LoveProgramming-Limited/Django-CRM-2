@@ -1,4 +1,5 @@
 from django import forms
+
 from cases.models import Case
 from common.models import Comment, Attachments
 from teams.models import Teams
@@ -26,7 +27,8 @@ class CaseForm(forms.ModelForm):
         for key, value in self.fields.items():
             value.widget.attrs['placeholder'] = value.label
 
-        self.fields["teams"].choices = [(team.get('id'), team.get('name')) for team in Teams.objects.all().values('id', 'name')]
+        self.fields["teams"].choices = [(team.get('id'), team.get('name')) for team in
+                                        Teams.objects.all().values('id', 'name')]
         self.fields["teams"].required = False
 
     class Meta:
@@ -51,7 +53,7 @@ class CaseCommentForm(forms.ModelForm):
     class Meta:
         model = Comment
 
-        fields = ('comment', 'case', 'commented_by', )
+        fields = ('comment', 'case', 'commented_by',)
 
 
 class CaseAttachmentForm(forms.ModelForm):

@@ -1,9 +1,9 @@
 import boto.ses
-import sendgrid
-import requests
 import mandrill
-from django.core.mail import EmailMultiAlternatives
+import requests
+import sendgrid
 from django.conf import settings
+from django.core.mail import EmailMultiAlternatives
 
 
 def send_mail(mto, mfrom, msubject, mbody, user_active):

@@ -12,5 +12,5 @@ class TestCeleryTasks(CaseCreation, TestCase):
                        BROKER_BACKEND='memory')
     def test_celery_tasks(self):
         task = send_email_to_assigned_user.apply(
-            ([self.user.id, self.user1.id, ], self.case.id,),)
+            ([self.user.id, self.user1.id, ], self.case.id,), )
         self.assertEqual('SUCCESS', task.state)

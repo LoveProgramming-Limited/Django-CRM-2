@@ -19,3 +19,11 @@ env
 docs/build
 celerybeat-schedule
 local_settings.py
+testingonlySTATIC_ROOT
+stdout3.txt
+stdout1.txt
+stdout.txt
+stderr1.txt
+stderr.txt
+envSetting.txt
+export_to_crm.json

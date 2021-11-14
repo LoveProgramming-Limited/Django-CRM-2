@@ -1,13 +1,13 @@
+from django.contrib.contenttypes.fields import GenericForeignKey
+from django.contrib.contenttypes.models import ContentType
 from django.db import models
 from django.utils.translation import pgettext_lazy
 from django.utils.translation import ugettext_lazy as _
-from django.contrib.contenttypes.models import ContentType
-from django.contrib.contenttypes.fields import GenericForeignKey
 
-from leads.models import Lead
-from contacts.models import Contact
 from common.models import User
 from common.utils import EVENT_PARENT_TYPE, EVENT_STATUS
+from contacts.models import Contact
+from leads.models import Lead
 
 
 class Reminder(models.Model):
@@ -23,9 +23,9 @@ class Reminder(models.Model):
 
 class Event(models.Model):
     limit = models.Q(app_label='account', model='Account', id=10) | \
-        models.Q(app_label='leads', model='Lead', id=13) | \
-        models.Q(app_label='opportunity', model='Opportunity', id=14) | \
-        models.Q(app_label='cases', model='Case', id=11)
+            models.Q(app_label='leads', model='Lead', id=13) | \
+            models.Q(app_label='opportunity', model='Opportunity', id=14) | \
+            models.Q(app_label='cases', model='Case', id=11)
     name = models.CharField(
         pgettext_lazy("Name of the Event", "Event"),
         max_length=64)

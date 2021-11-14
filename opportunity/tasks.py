@@ -1,13 +1,11 @@
 from celery.task import task
-from django.conf import settings
-from django.core.mail import EmailMultiAlternatives, EmailMessage
-from django.db.models import Q
+from django.core.mail import EmailMessage
 from django.shortcuts import reverse
 from django.template.loader import render_to_string
 
 from accounts.models import User
-from opportunity.models import Opportunity
 from marketing.models import BlockedDomain, BlockedEmail
+from opportunity.models import Opportunity
 
 
 @task
@@ -25,7 +23,7 @@ def send_email_to_assigned_user(recipients, opportunity_id, domain='demo.django-
                 recipients_list.append(user.email)
                 context = {}
                 context["url"] = protocol + '://' + domain + \
-                    reverse('opportunity:opp_view', args=(opportunity.id,))
+                                 reverse('opportunity:opp_view', args=(opportunity.id,))
                 context["user"] = user
                 context["opportunity"] = opportunity
                 context["created_by"] = created_by

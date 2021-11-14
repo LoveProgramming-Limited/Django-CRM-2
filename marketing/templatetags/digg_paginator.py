@@ -8,7 +8,7 @@ NUM_PAGES_OUTSIDE_RANGE = 0
 ADJACENT_PAGES = 2
 
 
-def digg_paginator(context): # pragma: no cover
+def digg_paginator(context):  # pragma: no cover
     '''
     To be used in conjunction with the object_list generic view.
 
@@ -54,7 +54,7 @@ def digg_paginator(context): # pragma: no cover
     # get_params = params.urlencode()
 
     if 'bounced_contacts_page' in params:
-        del(params['bounced_contacts_page'])
+        del (params['bounced_contacts_page'])
     get_params = params.urlencode()
 
     if page_obj.has_previous():

@@ -1,8 +1,8 @@
 import arrow
-
 from django.db import models
-from common.models import User
 from django.utils.translation import ugettext_lazy as _
+
+from common.models import User
 
 
 class Teams(models.Model):

@@ -1,4 +1,5 @@
 import os
+
 from celery.schedules import crontab
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
@@ -81,7 +82,7 @@ WSGI_APPLICATION = 'crm.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'dj_crm',
+        'NAME': 'postgrestestingonly',
         'USER': 'postgres',
         'PASSWORD': 'root',
         'HOST': os.getenv('DB_HOST', '127.0.0.1'),
@@ -131,16 +132,16 @@ EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 # EMAIL_BACKEND = 'django.core.mail.backends.dummy.EmailBackend'
 # EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
-# EMAIL_HOST = 'localhost'
-# EMAIL_PORT = 25
+EMAIL_HOST = 'localhost'
+EMAIL_PORT = 25
 # AUTHENTICATION_BACKENDS = ('django.contrib.auth.backends.ModelBackend', )
 
 
-EMAIL_HOST = 'smtp.sendgrid.net'
-EMAIL_HOST_USER = os.getenv('SG_USER', '')
-EMAIL_HOST_PASSWORD = os.getenv('SG_PWD', '')
-EMAIL_PORT = 587
-EMAIL_USE_TLS = True
+# EMAIL_HOST = 'smtp.sendgrid.net'
+# EMAIL_HOST_USER = os.getenv('SG_USER', '')
+# EMAIL_HOST_PASSWORD = os.getenv('SG_PWD', '')
+# EMAIL_PORT = 587
+# EMAIL_USE_TLS = True
 
 AUTH_USER_MODEL = 'common.User'
 
@@ -153,7 +154,7 @@ if STORAGE_TYPE == 'normal':
     STATIC_URL = '/static/'
     STATICFILES_DIRS = (BASE_DIR + '/static',)
     COMPRESS_ROOT = BASE_DIR + '/static/'
-
+    STATIC_ROOT = "testingonlySTATIC_ROOT"
 elif STORAGE_TYPE == 's3-storage':
 
     AWS_STORAGE_BUCKET_NAME = AWS_BUCKET_NAME = os.getenv('AWSBUCKETNAME', '')
@@ -224,8 +225,8 @@ COMPRESS_OFFLINE_CONTEXT = {
 DEFAULT_FROM_EMAIL = 'no-reply@django-crm.micropyramid.com'
 
 # celery Tasks
-CELERY_BROKER_URL = 'redis://localhost:6379'
-CELERY_RESULT_BACKEND = 'redis://localhost:6379'
+CELERY_BROKER_URL = os.environ.get("CELERY_BROKER", "redis://redis:6379/0")
+CELERY_RESULT_BACKEND = os.environ.get("CELERY_BROKER", "redis://redis:6379/0")
 
 CELERY_BEAT_SCHEDULE = {
     "runs-campaign-for-every-thiry-minutes": {
@@ -270,7 +271,6 @@ try:
 except ImportError:
     pass
 
-
 GP_CLIENT_ID = os.getenv('GP_CLIENT_ID', False)
 GP_CLIENT_SECRET = os.getenv('GP_CLIENT_SECRET', False)
 ENABLE_GOOGLE_LOGIN = os.getenv('ENABLE_GOOGLE_LOGIN', False)
@@ -290,9 +290,9 @@ if SENTRY_ENABLED and not DEBUG:
             'raven.contrib.django.raven_compat',
         ]
         MIDDLEWARE = [
-            'raven.contrib.django.raven_compat.middleware.Sentry404CatchMiddleware',
-            'raven.contrib.django.raven_compat.middleware.SentryResponseErrorIdMiddleware',
-         ] + MIDDLEWARE
+                         'raven.contrib.django.raven_compat.middleware.Sentry404CatchMiddleware',
+                         'raven.contrib.django.raven_compat.middleware.SentryResponseErrorIdMiddleware',
+                     ] + MIDDLEWARE
         LOGGING = {
             'version': 1,
             'disable_existing_loggers': True,
@@ -338,7 +338,7 @@ if SENTRY_ENABLED and not DEBUG:
 HAYSTACK_CONNECTIONS = {
     'default': {
         'ENGINE': 'haystack.backends.elasticsearch_backend.ElasticsearchSearchEngine',
-        'URL': 'http://127.0.0.1:9200/',
+        'URL': 'http://elasticsearchtestingonlyk:9200/',
         'INDEX_NAME': 'haystack_marketing_contact_emails',
     },
 }
@@ -352,7 +352,6 @@ if os.path.isfile('crm/local_settings.py'):
     from .local_settings import *
 else:
     print("No local settings file found")
-
 
 # CACHES = {
 #     'default': {

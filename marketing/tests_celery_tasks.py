@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta
+from datetime import datetime
 
 from django.test import TestCase
 from django.test.utils import override_settings
@@ -17,13 +17,13 @@ class TestCeleryTasks(TestMarketingModel, TestCase):
                        CELERY_ALWAYS_EAGER=True,
                        BROKER_BACKEND='memory')
     def test_celery_tasks(self):
-        task = run_campaign.apply((self.campaign.id,),)
+        task = run_campaign.apply((self.campaign.id,), )
         self.assertEqual('SUCCESS', task.state)
 
         self.campaign.reply_to_email = None
         self.campaign.save()
 
-        task = run_campaign.apply((self.campaign.id,),)
+        task = run_campaign.apply((self.campaign.id,), )
         self.assertEqual('SUCCESS', task.state)
 
         self.campaign.schedule_date_time = datetime.now()
@@ -38,29 +38,29 @@ class TestCeleryTasks(TestMarketingModel, TestCase):
         task = send_scheduled_campaigns.apply()
         self.assertEqual('SUCCESS', task.state)
 
-        task = delete_multiple_contacts_tasks.apply((self.contact_list.id,),)
+        task = delete_multiple_contacts_tasks.apply((self.contact_list.id,), )
         self.assertEqual('SUCCESS', task.state)
 
-        task = send_campaign_email_to_admin_contact.apply((self.campaign.id,),)
+        task = send_campaign_email_to_admin_contact.apply((self.campaign.id,), )
         self.assertEqual('SUCCESS', task.state)
 
         valid_rows = [
             {'company name': 'company_name_1', 'email': 'user1@email.com', 'first name': 'first_name',
-                'last name': 'last_name', 'city': 'Hyderabad', 'state': 'Telangana'},
+             'last name': 'last_name', 'city': 'Hyderabad', 'state': 'Telangana'},
             {'company name': 'company_name_2', 'email': 'user2@email.com', 'first name': 'first_name',
-                'last name': 'last_name', 'city': 'Hyderabad', 'state': 'Telangana'},
+             'last name': 'last_name', 'city': 'Hyderabad', 'state': 'Telangana'},
             {'company name': 'company_name_3', 'email': 'user3@email.com', 'first name': 'first_name',
-                'last name': 'last_name', 'city': 'Hyderabad', 'state': 'Telangana'},
+             'last name': 'last_name', 'city': 'Hyderabad', 'state': 'Telangana'},
             {'company name': 'company_name_4', 'email': 'user4@email.com', 'first name': 'first_name',
-                'last name': 'last_name', 'city': 'Hyderabad', 'state': 'Telangana'}
+             'last name': 'last_name', 'city': 'Hyderabad', 'state': 'Telangana'}
         ]
 
         invalid_rows = [
             {'company name': 'company_name_1', 'email': 'useremail.com', 'first name': 'first_name',
-                'last name': 'last_name', 'city': 'Hyderabad', 'state': 'Telangana'},
+             'last name': 'last_name', 'city': 'Hyderabad', 'state': 'Telangana'},
             {'company name': 'company_name_2', 'email': 'user2@email', 'first name': 'first_name',
-                'last name': 'last_name', 'city': 'Hyderabad', 'state': 'Telangana'},
+             'last name': 'last_name', 'city': 'Hyderabad', 'state': 'Telangana'},
         ]
         task = upload_csv_file.apply(
-            (valid_rows, invalid_rows, self.user.id, [self.contact_list.id, ],),)
+            (valid_rows, invalid_rows, self.user.id, [self.contact_list.id, ],), )
         self.assertEqual('SUCCESS', task.state)

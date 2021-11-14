@@ -1,11 +1,9 @@
-from datetime import datetime, timedelta
-
 from django.test import TestCase
 from django.test.utils import override_settings
 
 from accounts.tests import AccountCreateTest
 from cases.tests import CaseCreation
-from common.models import User, Comment
+from common.models import User
 from common.tasks import (resend_activation_link_to_user,
                           send_email_to_new_user, send_email_user_delete,
                           send_email_user_mentions, send_email_user_status)
@@ -25,11 +23,11 @@ class TestCeleryTasks(ObjectsCreation, TestCase):
                        BROKER_BACKEND='memory')
     def test_celery_tasks(self):
         task = send_email_to_new_user.apply((
-            self.user1.email, self.user.email,),)
+            self.user1.email, self.user.email,), )
         self.assertEqual('SUCCESS', task.state)
 
         task = send_email_user_status.apply((
-            self.user1.id, self.user.id,),)
+            self.user1.id, self.user.id,), )
         self.assertEqual('SUCCESS', task.state)
 
         self.user1.is_active = False
@@ -38,7 +36,7 @@ class TestCeleryTasks(ObjectsCreation, TestCase):
         self.user1.save()
 
         task = send_email_user_status.apply((
-            self.user1.id,),)
+            self.user1.id,), )
         self.assertEqual('SUCCESS', task.state)
 
         self.user1.is_active = True
@@ -47,19 +45,19 @@ class TestCeleryTasks(ObjectsCreation, TestCase):
         self.user1.save()
 
         task = send_email_user_status.apply((
-            self.user1.id,),)
+            self.user1.id,), )
         self.assertEqual('SUCCESS', task.state)
 
         task = send_email_user_delete.apply((
-            self.user1.email,),)
+            self.user1.email,), )
         self.assertEqual('SUCCESS', task.state)
 
         task = resend_activation_link_to_user.apply((
-            self.user1.email,),)
+            self.user1.email,), )
         self.assertEqual('SUCCESS', task.state)
 
         task = resend_activation_link_to_user.apply((
-            self.user1.email,),)
+            self.user1.email,), )
         self.assertEqual('SUCCESS', task.state)
 
 
@@ -79,7 +77,7 @@ class TestUserMentionsForAccountComments(AccountCreateTest, TestCase):
         self.comment.save()
 
         task = send_email_user_mentions.apply((
-            self.comment.id, 'accounts',),)
+            self.comment.id, 'accounts',), )
         self.assertEqual('SUCCESS', task.state)
 
 
@@ -99,7 +97,7 @@ class TestUserMentionsForContactsComments(ContactObjectsCreation, TestCase):
         self.comment.save()
 
         task = send_email_user_mentions.apply((
-            self.comment.id, 'contacts',),)
+            self.comment.id, 'contacts',), )
         self.assertEqual('SUCCESS', task.state)
 
 
@@ -119,7 +117,7 @@ class TestUserMentionsForLeadsComments(TestLeadModel, TestCase):
         self.comment.save()
 
         task = send_email_user_mentions.apply((
-            self.comment.id, 'leads',),)
+            self.comment.id, 'leads',), )
         self.assertEqual('SUCCESS', task.state)
 
 
@@ -139,7 +137,7 @@ class TestUserMentionsForOpportunityComments(OpportunityModel, TestCase):
         self.comment.save()
 
         task = send_email_user_mentions.apply((
-            self.comment.id, 'opportunity',),)
+            self.comment.id, 'opportunity',), )
         self.assertEqual('SUCCESS', task.state)
 
 
@@ -159,7 +157,7 @@ class TestUserMentionsForCasesComments(CaseCreation, TestCase):
         self.comment.save()
 
         task = send_email_user_mentions.apply((
-            self.comment.id, 'cases',),)
+            self.comment.id, 'cases',), )
         self.assertEqual('SUCCESS', task.state)
 
 
@@ -179,7 +177,7 @@ class TestUserMentionsForTasksComments(TaskCreateTest, TestCase):
         self.comment.save()
 
         task = send_email_user_mentions.apply((
-            self.comment.id, 'tasks',),)
+            self.comment.id, 'tasks',), )
         self.assertEqual('SUCCESS', task.state)
 
 
@@ -199,7 +197,7 @@ class TestUserMentionsForInvoiceComments(InvoiceCreateTest, TestCase):
         self.comment.save()
 
         task = send_email_user_mentions.apply((
-            self.comment.id, 'invoices',),)
+            self.comment.id, 'invoices',), )
         self.assertEqual('SUCCESS', task.state)
 
 
@@ -219,5 +217,5 @@ class TestUserMentionsForEventsComments(EventObjectTest, TestCase):
         self.comment.save()
 
         task = send_email_user_mentions.apply((
-            self.comment.id, 'events',),)
+            self.comment.id, 'events',), )
         self.assertEqual('SUCCESS', task.state)

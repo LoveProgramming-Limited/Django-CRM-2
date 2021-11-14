@@ -81,7 +81,7 @@ def send_email_to_assigned_user(recipients, lead_id, domain='demo.django-crm.io'
                 recipients_list.append(user.email)
                 context = {}
                 context["url"] = protocol + '://' + domain + \
-                    reverse('leads:view_lead', args=(lead.id,))
+                                 reverse('leads:view_lead', args=(lead.id,))
                 context["user"] = user
                 context["lead"] = lead
                 context["created_by"] = created_by

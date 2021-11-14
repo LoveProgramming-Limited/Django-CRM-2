@@ -1,4 +1,5 @@
 from django.urls import path
+
 from contacts.views import (
     ContactsListView, CreateContactView, ContactDetailView,
     UpdateContactView, RemoveContactView,
@@ -6,7 +7,6 @@ from contacts.views import (
     DeleteCommentView, AddAttachmentsView, DeleteAttachmentsView)
 
 app_name = 'contacts'
-
 
 urlpatterns = [
     path('', ContactsListView.as_view(), name='list'),

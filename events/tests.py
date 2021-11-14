@@ -4,7 +4,7 @@ from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import TestCase
 from django.urls import reverse
 
-from common.models import Address, Attachments, Comment, User
+from common.models import Attachments, Comment, User
 from contacts.models import Contact
 from events.models import Event
 from teams.models import Teams
@@ -152,7 +152,8 @@ class EventCreateTestCase(EventObjectTest, TestCase):
         response = self.client.post(reverse('events:event_create'), data)
         self.assertEqual(response.status_code, 200)
 
-        data = {**data, 'name': 'recurring event test', 'end_date': (datetime.now() + timedelta(days=7)).strftime('%Y-%m-%d'),
+        data = {**data, 'name': 'recurring event test',
+                'end_date': (datetime.now() + timedelta(days=7)).strftime('%Y-%m-%d'),
                 'start_date': (datetime.now()).strftime('%Y-%m-%d'), }
         response = self.client.post(reverse('events:event_create'), data)
         self.assertEqual(response.status_code, 200)
@@ -161,7 +162,8 @@ class EventCreateTestCase(EventObjectTest, TestCase):
         response = self.client.post(reverse('events:event_create'), data)
         self.assertEqual(response.status_code, 200)
 
-        data = {**data, 'name': 'recurring event test', 'start_date': (datetime.now() + timedelta(days=7)).strftime('%Y-%m-%d'),
+        data = {**data, 'name': 'recurring event test',
+                'start_date': (datetime.now() + timedelta(days=7)).strftime('%Y-%m-%d'),
                 'end_date': (datetime.now()).strftime('%Y-%m-%d'), }
         response = self.client.post(reverse('events:event_create'), data)
         self.assertEqual(response.status_code, 200)
@@ -272,7 +274,6 @@ class EventEditTestCase(EventObjectTest, TestCase):
 class AddCommentTestCase(EventObjectTest, TestCase):
 
     def test_event_add_comment(self):
-
         self.client.login(email='johnDoeEvent@example.com',
                           password='password')
         data = {
@@ -301,7 +302,6 @@ class AddCommentTestCase(EventObjectTest, TestCase):
 class UpdateCommentTestCase(EventObjectTest, TestCase):
 
     def test_event_update_comment(self):
-
         self.client.login(email='johnDoeEvent@example.com',
                           password='password')
         data = {
@@ -332,7 +332,6 @@ class UpdateCommentTestCase(EventObjectTest, TestCase):
 class DeleteCommentTestCase(EventObjectTest, TestCase):
 
     def test_event_delete_comment(self):
-
         data = {
             'comment_id': self.comment.id,
         }
@@ -352,7 +351,6 @@ class DeleteCommentTestCase(EventObjectTest, TestCase):
 class AddAttachmentTestCase(EventObjectTest, TestCase):
 
     def test_event_add_attachment(self):
-
         data = {
             'attachment': SimpleUploadedFile('file_name.txt', bytes('file contents.', 'utf-8')),
             'event_id': self.event.id
@@ -383,7 +381,6 @@ class AddAttachmentTestCase(EventObjectTest, TestCase):
 class DeleteAttachmentTestCase(EventObjectTest, TestCase):
 
     def test_invoice_delete_attachment(self):
-
         data = {
             'attachment_id': self.attachment.id,
         }
@@ -403,7 +400,6 @@ class DeleteAttachmentTestCase(EventObjectTest, TestCase):
 class EventDeleteTestCase(EventObjectTest, TestCase):
 
     def test_events_delete(self):
-
         self.client.login(email='janeDoeEvent@example.com',
                           password='password')
         response = self.client.get(
@@ -415,4 +411,3 @@ class EventDeleteTestCase(EventObjectTest, TestCase):
         response = self.client.get(
             reverse('events:event_delete', args=(self.event.id,)))
         self.assertEqual(response.status_code, 302)
-

@@ -1,29 +1,27 @@
-from datetime import date, datetime, timedelta
+from datetime import datetime, timedelta
 
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.sites.shortcuts import get_current_site
 from django.core.exceptions import PermissionDenied
 from django.db.models import Q
-from django.http import HttpResponse, JsonResponse
+from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render, reverse
-from django.views.generic import (CreateView, DeleteView, DetailView, FormView,
-                                  TemplateView, UpdateView, View)
+from django.views.generic import (CreateView, View)
 
+from common.access_decorators_mixins import (
+    sales_access_required)
 from common.models import Attachments, Comment, User
 from common.tasks import send_email_user_mentions
 from events.forms import EventAttachmentForm, EventCommentForm, EventForm
 from events.models import Event
 from events.tasks import send_email
-from common.access_decorators_mixins import (
-    sales_access_required, marketing_access_required, SalesAccessRequiredMixin, MarketingAccessRequiredMixin)
 from teams.models import Teams
 
 
 @login_required
 @sales_access_required
 def events_list(request):
-
     if request.user.role == 'ADMIN' or request.user.is_superuser:
         users = User.objects.all()
     # elif request.user.google.all():
@@ -34,7 +32,6 @@ def events_list(request):
         users = User.objects.filter(Q(role='ADMIN') | Q(id=request.user.id))
     else:
         pass
-
 
     if request.method == 'GET':
         context = {}
@@ -110,7 +107,8 @@ def event_create(request):
                 event.save()
                 form.save_m2m()
                 if request.POST.getlist('teams', []):
-                    user_ids = Teams.objects.filter(id__in=request.POST.getlist('teams')).values_list('users', flat=True)
+                    user_ids = Teams.objects.filter(id__in=request.POST.getlist('teams')).values_list('users',
+                                                                                                      flat=True)
                     assinged_to_users_ids = event.assigned_to.all().values_list('id', flat=True)
                     for user_id in user_ids:
                         if user_id not in assinged_to_users_ids:
@@ -145,7 +143,8 @@ def event_create(request):
                     event.contacts.add(*request.POST.getlist('contacts'))
                     event.assigned_to.add(*request.POST.getlist('assigned_to'))
                     if request.POST.getlist('teams', []):
-                        user_ids = Teams.objects.filter(id__in=request.POST.getlist('teams')).values_list('users', flat=True)
+                        user_ids = Teams.objects.filter(id__in=request.POST.getlist('teams')).values_list('users',
+                                                                                                          flat=True)
                         assinged_to_users_ids = event.assigned_to.all().values_list('id', flat=True)
                         for user_id in user_ids:
                             if user_id not in assinged_to_users_ids:
@@ -155,7 +154,7 @@ def event_create(request):
                         event.teams.add(*request.POST.getlist('teams'))
                     assigned_to_list = list(event.assigned_to.all().values_list('id', flat=True))
                     send_email.delay(
-                        event.id, assigned_to_list,  domain=request.get_host(), protocol=request.scheme)
+                        event.id, assigned_to_list, domain=request.get_host(), protocol=request.scheme)
 
             return JsonResponse({'error': False, 'success_url': reverse('events:events_list')})
         else:
@@ -166,7 +165,8 @@ def event_create(request):
 @sales_access_required
 def event_detail_view(request, event_id):
     event = get_object_or_404(Event, pk=event_id)
-    if not (request.user.role == 'ADMIN' or request.user.is_superuser or event.created_by == request.user or request.user in event.assigned_to.all()):
+    if not (
+            request.user.role == 'ADMIN' or request.user.is_superuser or event.created_by == request.user or request.user in event.assigned_to.all()):
         raise PermissionDenied
 
     if request.method == 'GET':
@@ -190,7 +190,8 @@ def event_detail_view(request, event_id):
 @sales_access_required
 def event_update(request, event_id):
     event_obj = get_object_or_404(Event, pk=event_id)
-    if not (request.user.role == 'ADMIN' or request.user.is_superuser or event_obj.created_by == request.user or request.user in event_obj.assigned_to.all()):
+    if not (
+            request.user.role == 'ADMIN' or request.user.is_superuser or event_obj.created_by == request.user or request.user in event_obj.assigned_to.all()):
         raise PermissionDenied
 
     if request.method == 'GET':
@@ -224,7 +225,8 @@ def event_update(request, event_id):
                 event.save()
                 form.save_m2m()
                 if request.POST.getlist('teams', []):
-                    user_ids = Teams.objects.filter(id__in=request.POST.getlist('teams')).values_list('users', flat=True)
+                    user_ids = Teams.objects.filter(id__in=request.POST.getlist('teams')).values_list('users',
+                                                                                                      flat=True)
                     assinged_to_users_ids = event.assigned_to.all().values_list('id', flat=True)
                     for user_id in user_ids:
                         if user_id not in assinged_to_users_ids:
@@ -244,7 +246,8 @@ def event_update(request, event_id):
                 event.save()
                 form.save_m2m()
                 if request.POST.getlist('teams', []):
-                    user_ids = Teams.objects.filter(id__in=request.POST.getlist('teams')).values_list('users', flat=True)
+                    user_ids = Teams.objects.filter(id__in=request.POST.getlist('teams')).values_list('users',
+                                                                                                      flat=True)
                     assinged_to_users_ids = event.assigned_to.all().values_list('id', flat=True)
                     for user_id in user_ids:
                         if user_id not in assinged_to_users_ids:
@@ -288,8 +291,8 @@ class AddCommentView(LoginRequiredMixin, CreateView):
         self.event = get_object_or_404(
             Event, id=request.POST.get('event_id'))
         if (
-            request.user == self.event.created_by or request.user.is_superuser or
-            request.user.role == 'ADMIN'
+                request.user == self.event.created_by or request.user.is_superuser or
+                request.user.role == 'ADMIN'
         ):
             form = self.get_form()
             if form.is_valid():
@@ -376,9 +379,9 @@ class AddAttachmentView(LoginRequiredMixin, CreateView):
         self.event = get_object_or_404(
             Event, id=request.POST.get('event_id'))
         if (
-            request.user == self.event.created_by or
-            request.user.is_superuser or
-            request.user.role == 'ADMIN'
+                request.user == self.event.created_by or
+                request.user.is_superuser or
+                request.user.role == 'ADMIN'
         ):
             form = self.get_form()
             if form.is_valid():
@@ -420,9 +423,9 @@ class DeleteAttachmentsView(LoginRequiredMixin, View):
         self.object = get_object_or_404(
             Attachments, id=request.POST.get("attachment_id"))
         if (
-            request.user == self.object.created_by or
-            request.user.is_superuser or
-            request.user.role == 'ADMIN'
+                request.user == self.object.created_by or
+                request.user.is_superuser or
+                request.user.role == 'ADMIN'
         ):
             self.object.delete()
             data = {"acd": request.POST.get("attachment_id")}

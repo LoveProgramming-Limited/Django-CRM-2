@@ -1,7 +1,6 @@
 import pytz
 from django.utils.translation import ugettext_lazy as _
 
-
 INDCHOICES = (
     ('ADVERTISING', 'ADVERTISING'),
     ('AGRICULTURE', 'AGRICULTURE'),
@@ -54,7 +53,6 @@ LEAD_STATUS = (
     ('recycled', 'Recycled'),
     ('closed', 'Closed')
 )
-
 
 LEAD_SOURCE = (
     ('call', 'Call'),
@@ -129,7 +127,6 @@ EVENT_STATUS = (
     ('Canceled', 'Canceled'),
     ('Deferred', 'Deferred')
 )
-
 
 COUNTRIES = (
     ('GB', _('United Kingdom')),

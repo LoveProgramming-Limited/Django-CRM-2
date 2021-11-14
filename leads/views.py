@@ -16,9 +16,7 @@ from django.views.generic import (CreateView, DetailView, ListView,
 
 from accounts.models import Account, Tags
 from common import status
-from common.access_decorators_mixins import (MarketingAccessRequiredMixin,
-                                             SalesAccessRequiredMixin,
-                                             marketing_access_required,
+from common.access_decorators_mixins import (SalesAccessRequiredMixin,
                                              sales_access_required)
 from common.models import APISettings, Attachments, Comment, User
 from common.tasks import send_email_user_mentions
@@ -41,15 +39,15 @@ class LeadListView(SalesAccessRequiredMixin, LoginRequiredMixin, TemplateView):
 
     def get_queryset(self):
         queryset = self.model.objects.all().exclude(status='converted').select_related('created_by').prefetch_related(
-            'tags', 'contacts', 'assigned_to',)
+            'tags', 'contacts', 'assigned_to', )
         if (self.request.user.role != "ADMIN" and not
-                self.request.user.is_superuser):
+        self.request.user.is_superuser):
             queryset = queryset.filter(
                 Q(assigned_to__in=[self.request.user]) |
                 Q(created_by=self.request.user))
 
         if self.request.GET.get('tag', None):
-            queryset = queryset.filter(tags__in = self.request.GET.getlist('tag'))
+            queryset = queryset.filter(tags__in=self.request.GET.getlist('tag'))
 
         request_post = self.request.POST
         if request_post:
@@ -91,16 +89,16 @@ class LeadListView(SalesAccessRequiredMixin, LoginRequiredMixin, TemplateView):
         context["request_tags"] = self.request.POST.getlist('tag')
 
         search = True if (
-            self.request.POST.get('name') or self.request.POST.get('city') or
-            self.request.POST.get('email') or self.request.POST.get('tag') or
-            self.request.POST.get('status') or
-            self.request.POST.get('source') or
-            self.request.POST.get('assigned_to')
+                self.request.POST.get('name') or self.request.POST.get('city') or
+                self.request.POST.get('email') or self.request.POST.get('tag') or
+                self.request.POST.get('status') or
+                self.request.POST.get('source') or
+                self.request.POST.get('assigned_to')
         ) else False
 
         context["search"] = search
 
-        tag_ids = list(set(self.get_queryset().values_list('tags', flat=True,)))
+        tag_ids = list(set(self.get_queryset().values_list('tags', flat=True, )))
         context["tags"] = Tags.objects.filter(id__in=tag_ids)
 
         tab_status = 'Open'
@@ -178,7 +176,7 @@ def create_lead(request):
             current_site = get_current_site(request)
             recipients = list(lead_obj.assigned_to.all().values_list('id', flat=True))
             send_email_to_assigned_user.delay(recipients, lead_obj.id, domain=current_site.domain,
-                protocol=request.scheme)
+                                              protocol=request.scheme)
 
             if request.FILES.get('lead_attachment'):
                 attachment = Attachments()
@@ -211,7 +209,7 @@ def create_lead(request):
                     current_site = get_current_site(request)
                     recipients = assigned_to_list
                     send_email_to_assigned_user.delay(recipients, lead_obj.id, domain=current_site.domain,
-                        protocol=request.scheme)
+                                                      protocol=request.scheme)
                     # for assigned_to_user in assigned_to_list:
                     #     user = get_object_or_404(User, pk=assigned_to_user)
                     #     mail_subject = 'Assigned to account.'
@@ -259,7 +257,7 @@ class LeadDetailView(SalesAccessRequiredMixin, LoginRequiredMixin, DetailView):
         if self.request.user == context['object'].created_by:
             user_assgn_list.append(self.request.user.id)
         if (self.request.user.role != "ADMIN" and not
-                self.request.user.is_superuser):
+        self.request.user.is_superuser):
             if self.request.user.id not in user_assgn_list:
                 raise PermissionDenied
         comments = Comment.objects.filter(
@@ -354,7 +352,6 @@ def update_lead(request, pk):
                     lead_obj.tags.add(tag)
             if request.POST.getlist('assigned_to', []):
                 if request.POST.get('status') != "converted":
-
                     current_site = get_current_site(request)
 
                     assigned_form_users = form.cleaned_data.get(
@@ -404,7 +401,7 @@ def update_lead(request, pk):
             assigned_to_list = list(lead_obj.assigned_to.all().values_list('id', flat=True))
             recipients = list(set(assigned_to_list) - set(previous_assigned_to_users))
             send_email_to_assigned_user.delay(recipients, lead_obj.id, domain=current_site.domain,
-                protocol=request.scheme)
+                                              protocol=request.scheme)
 
             if request.FILES.get('lead_attachment'):
                 attachment = Attachments()
@@ -437,7 +434,7 @@ def update_lead(request, pk):
                     current_site = get_current_site(request)
                     recipients = assigned_to_list
                     send_email_to_assigned_user.delay(recipients, lead_obj.id, domain=current_site.domain,
-                        protocol=request.scheme)
+                                                      protocol=request.scheme)
                     # current_site = get_current_site(request)
                     # for assigned_to_user in assigned_to_list:
                     #     user = get_object_or_404(User, pk=assigned_to_user)
@@ -496,9 +493,9 @@ class DeleteLeadView(SalesAccessRequiredMixin, LoginRequiredMixin, View):
     def post(self, request, *args, **kwargs):
         self.object = get_object_or_404(Lead, id=kwargs.get("pk"))
         if (
-            self.request.user.role == "ADMIN" or
-            self.request.user.is_superuser or
-            self.request.user == self.object.created_by
+                self.request.user.role == "ADMIN" or
+                self.request.user.is_superuser or
+                self.request.user == self.object.created_by
         ):
             self.object.delete()
             return redirect("leads:list")
@@ -556,10 +553,10 @@ class AddCommentView(LoginRequiredMixin, CreateView):
         self.object = None
         self.lead = get_object_or_404(Lead, id=request.POST.get('leadid'))
         if (
-            request.user in self.lead.assigned_to.all() or
-            request.user == self.lead.created_by or
-            request.user.is_superuser or
-            request.user.role == 'ADMIN'
+                request.user in self.lead.assigned_to.all() or
+                request.user == self.lead.created_by or
+                request.user.is_superuser or
+                request.user.role == 'ADMIN'
         ):
             form = self.get_form()
             if form.is_valid():
@@ -578,7 +575,7 @@ class AddCommentView(LoginRequiredMixin, CreateView):
         comment_id = comment.id
         current_site = get_current_site(self.request)
         send_email_user_mentions.delay(comment_id, 'leads', domain=current_site.domain,
-            protocol=self.request.scheme)
+                                       protocol=self.request.scheme)
         return JsonResponse({
             "comment_id": comment.id, "comment": comment.comment,
             "commented_on": comment.commented_on,
@@ -612,7 +609,7 @@ class UpdateCommentView(LoginRequiredMixin, View):
         comment_id = self.comment_obj.id
         current_site = get_current_site(self.request)
         send_email_user_mentions.delay(comment_id, 'leads', domain=current_site.domain,
-            protocol=self.request.scheme)
+                                       protocol=self.request.scheme)
         return JsonResponse({
             "commentid": self.comment_obj.id,
             "comment": self.comment_obj.comment,
@@ -693,16 +690,16 @@ class DeleteAttachmentsView(LoginRequiredMixin, View):
         self.object = get_object_or_404(
             Attachments, id=request.POST.get("attachment_id"))
         if (
-            request.user == self.object.created_by or
-            request.user.is_superuser or
-            request.user.role == 'ADMIN'
+                request.user == self.object.created_by or
+                request.user.is_superuser or
+                request.user.role == 'ADMIN'
         ):
             self.object.delete()
             data = {"aid": request.POST.get("attachment_id")}
             return JsonResponse(data)
 
         data = {'error':
-                "You don't have permission to delete this attachment."}
+                    "You don't have permission to delete this attachment."}
         return JsonResponse(data)
 
 
@@ -718,7 +715,7 @@ def create_lead_from_site(request):
             return JsonResponse({
                 'error': True,
                 'message':
-                "You don't have permission, please contact the admin!."},
+                    "You don't have permission, please contact the admin!."},
                 status=status.HTTP_400_BAD_REQUEST)
 
         if (api_setting and request.POST.get("email") and
@@ -787,10 +784,11 @@ def remove_lead_tag(request):
     lead = get_object_or_404(Lead, pk=lead_id)
     if request.user == lead.created_by or request.user.role == 'ADMIN' or request.user.is_superuser:
         lead.tags.remove(tag_id)
-        data = {'data':'Tag Removed'}
+        data = {'data': 'Tag Removed'}
     else:
         data = {'error': "You don't have permission to delete this tag."}
     return JsonResponse(data)
+
 
 @login_required
 @sales_access_required
@@ -799,13 +797,13 @@ def upload_lead_csv_file(request):
         lead_form = LeadListForm(request.POST, request.FILES)
         if lead_form.is_valid():
             create_lead_from_file.delay(
-                    lead_form.validated_rows, lead_form.invalid_rows, request.user.id,
-                    request.get_host())
+                lead_form.validated_rows, lead_form.invalid_rows, request.user.id,
+                request.get_host())
             return JsonResponse({'error': False, 'data': lead_form.data},
-                status=status.HTTP_201_CREATED)
+                                status=status.HTTP_201_CREATED)
         else:
             return JsonResponse({'error': True, 'errors': lead_form.errors},
-                status=status.HTTP_200_OK)
+                                status=status.HTTP_200_OK)
 
 
 def sample_lead_file(request):

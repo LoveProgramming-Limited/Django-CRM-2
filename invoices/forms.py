@@ -1,9 +1,10 @@
 from django import forms
-from invoices.models import Invoice
-from common.models import User, Comment, Attachments, Address
 from django.db.models import Q
-from teams.models import Teams
+
 from accounts.models import Account
+from common.models import User, Comment, Attachments, Address
+from invoices.models import Invoice
+from teams.models import Teams
 
 
 class InvoiceForm(forms.ModelForm):
@@ -111,4 +112,4 @@ class InvoiceAddressForm(forms.ModelForm):
         self.fields['postcode'].widget.attrs.update({
             'placeholder': 'Postcode'})
         self.fields["country"].choices = [
-            ("", "--Country--"), ] + list(self.fields["country"].choices)[1:]
+                                             ("", "--Country--"), ] + list(self.fields["country"].choices)[1:]

@@ -1,5 +1,4 @@
 from celery.task import task
-from django.conf import settings
 from django.core.mail import EmailMessage
 from django.shortcuts import reverse
 from django.template.loader import render_to_string
@@ -27,7 +26,7 @@ def send_email(invoice_id, recipients, domain='demo.django-crm.io', protocol='ht
                 context['invoice_id'] = invoice_id
                 context['invoice_created_by'] = invoice.created_by
                 context["url"] = protocol + '://' + domain + \
-                    reverse('invoices:invoice_details', args=(invoice.id,))
+                                 reverse('invoices:invoice_details', args=(invoice.id,))
 
                 context['user'] = user
                 html_content = render_to_string(
@@ -44,7 +43,7 @@ def send_email(invoice_id, recipients, domain='demo.django-crm.io', protocol='ht
         context['invoice_id'] = invoice_id
         context['invoice_created_by'] = invoice.created_by
         context["url"] = protocol + '://' + domain + \
-            reverse('invoices:invoice_details', args=(invoice.id,))
+                         reverse('invoices:invoice_details', args=(invoice.id,))
         for recipient in recipients:
             context['user'] = recipient.email
             html_content = render_to_string(
@@ -53,7 +52,6 @@ def send_email(invoice_id, recipients, domain='demo.django-crm.io', protocol='ht
                 subject=subject, body=html_content, to=[recipient.email, ])
             msg.content_subtype = "html"
             msg.send()
-
 
 
 @task
@@ -65,7 +63,7 @@ def send_invoice_email(invoice_id, domain='demo.django-crm.io', protocol='http')
         context = {}
         context['invoice'] = invoice
         context['url'] = protocol + '://' + domain + \
-            reverse('invoices:invoice_details', args=(invoice.id,))
+                         reverse('invoices:invoice_details', args=(invoice.id,))
         html_content = render_to_string(
             'invoice_detail_email.html', context=context)
         msg = EmailMessage(subject=subject, body=html_content,
@@ -83,7 +81,7 @@ def send_invoice_email_cancel(invoice_id, domain='demo.django-crm.io', protocol=
         context = {}
         context['invoice'] = invoice
         context['url'] = protocol + '://' + domain + \
-            reverse('invoices:invoice_details', args=(invoice.id,))
+                         reverse('invoices:invoice_details', args=(invoice.id,))
         html_content = render_to_string(
             'invoice_cancelled.html', context=context)
         msg = EmailMessage(subject=subject, body=html_content,

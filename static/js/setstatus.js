@@ -12,30 +12,24 @@ $("body").on("click", ".setstatus", function (e) {
                     $("#" + eventID.match(/\D+/)[0] + data["id"] + "status").fadeOut(function () {
                         $(this).text(data["status"]);
                     }).fadeIn();
-                }
-                else if (data["AUTH"] == "NO") {
+                } else if (data["AUTH"] == "NO") {
                     window.location = "/accounts/login/";
                     //login REDIRECT URL
-                }
-                else if (data["INVALID"] == "METHOD") {
+                } else if (data["INVALID"] == "METHOD") {
                     window.location = "/logout/";
-                }
-                else if (data["METHOD"] == "INVALID") {
+                } else if (data["METHOD"] == "INVALID") {
                     window.location = "/logout/";
-                }
-                else {
+                } else {
                     if (data["Event"] != "DoesNotExist") {
                         window.location = "/logout/";
                     }
                 }
-            }
-            else if (status == "error") {
+            } else if (status == "error") {
                 console.log(jqXhr);
                 if (data["error"] == "Something Went Wrong!!!") {
                     window.location = "/";
                 }
-            }
-            else {
+            } else {
                 console.log(status);
             }
         });
@@ -50,14 +44,11 @@ $("body").on("click", "#selectparent", function (e) {
     }
     if ($("#parent_type").val() == "Contact") {
         gURL = "/contacts/get/list/";
-    }
-    else if ($("#parent_type").val() == "Lead") {
+    } else if ($("#parent_type").val() == "Lead") {
         gURL = "/leads/get/list/";
-    }
-    else if ($("#parent_type").val() == "Opportunity") {
+    } else if ($("#parent_type").val() == "Opportunity") {
         gURL = "/opportunities/get/list/";
-    }
-    else if ($("#parent_type").val() == "Case") {
+    } else if ($("#parent_type").val() == "Case") {
         gURL = "/cases/get/list/";
     }
     $.get(
@@ -80,8 +71,7 @@ $("body").on("click", "#selectparent", function (e) {
                     window.location = "/";
                     console.log("Something Went Wrong!!!");
                 }
-            }
-            else {
+            } else {
                 console.log(status);
             }
         });
@@ -115,8 +105,7 @@ $("body").on("click", ".glyphicon-trash", function (e) {
         $(this).css({"color": "red"});
         $($(this).siblings()[0]).attr("disabled", "");
         $($(this).siblings()[1]).attr("disabled", "");
-    }
-    else {
+    } else {
         $($(this).siblings()[2]).prop("checked", false);
         $($(this).siblings()[0]).removeAttr("disabled", "");
         $($(this).siblings()[1]).removeAttr("disabled", "");
@@ -132,8 +121,7 @@ $("body").on("click", ".pagination li a", function (e) {
         function (data, status, xhr) {
             if (status == "success") {
                 $(".for-pagination").html(data).animate({width: "100%"});
-            }
-            else if (status == "error") {
+            } else if (status == "error") {
                 $(".for-pagination").html("Something Went Wrong Try Again Later...");
             }
         });
@@ -162,8 +150,7 @@ $("body").on("click", "#selectusers", function (e) {
                     window.location = "/";
                     console.log("Something Went Wrong!!!");
                 }
-            }
-            else {
+            } else {
                 console.log(status);
             }
         });
@@ -183,8 +170,7 @@ $("body").on("click", "#selectusers-modal-body .paginate-me-users", function (e)
         function (data, status, xhr) {
             if (status == "success") {
                 $("#selectusers-modal-body").html(data).animate({width: "100%"});
-            }
-            else if (status == "error") {
+            } else if (status == "error") {
                 $(".for-pagination").html("Something Went Wrong Try Again Later...");
             }
         });
@@ -195,8 +181,7 @@ $("body").on("click", "#selectusers-modal-body .checkuser", function (e) {
     if ($(this).prop("checked") == true) {
         if (!($(this).val() in $uids))
             $uids[$(this).val()] = $(this).parent().next().text().trim();
-    }
-    else {
+    } else {
         delete $uids[$(this).val()];
     }
     // console.log($uids)
@@ -204,7 +189,11 @@ $("body").on("click", "#selectusers-modal-body .checkuser", function (e) {
 
 $("body").on("click", "#closeselectusersmodel", function (e) {
     if ($(".selectedusers").length < 1) {
-        $(".attendees-users-user_name").parent().after("<div class="selectedusers"></div>");
+        $(".attendees-users-user_name").parent().after("<div class="
+        selectedusers
+        "></div>"
+    )
+        ;
         $(".selectedusers").html("");
     }
     $(".selectedusers").html("");
@@ -247,8 +236,7 @@ $("body").on("click", "#select-attendee-contacts", function (e) {
                     window.location = "/";
                     console.log("Something Went Wrong!!!");
                 }
-            }
-            else {
+            } else {
                 console.log(status);
             }
         });
@@ -274,8 +262,7 @@ $("body").on("click", ".paginate-me-contacts", function (e) {
         function (data, status, xhr) {
             if (status == "success") {
                 $("#attendees_contacts-modal-body").html(data).animate({width: "100%"});
-            }
-            else if (status == "error") {
+            } else if (status == "error") {
                 $(".for-pagination-contacts").html("Something Went Wrong Try Again Later...");
             }
         });
@@ -284,10 +271,9 @@ var $cids = {}
 $("body").on("click", ".checkcontact", function (e) {
     // console.log($(this).prop("checked") == true)
     if ($(this).prop("checked") == true) {
-        if (!($(this).val() in $cids));
-            $cids[$(this).val()] = $(this).parent().next().text().trim();
-    }
-    else {
+        if (!($(this).val() in $cids)) ;
+        $cids[$(this).val()] = $(this).parent().next().text().trim();
+    } else {
         delete $cids[$(this).val()];
     }
     // console.log($cids)
@@ -334,8 +320,7 @@ $("body").on("click", "#select-attendee-leads", function (e) {
                     window.location = "/";
                     console.log("Something Went Wrong!!!");
                 }
-            }
-            else {
+            } else {
                 console.log(status);
             }
         });
@@ -361,8 +346,7 @@ $("body").on("click", ".paginate-me-leads", function (e) {
         function (data, status, xhr) {
             if (status == "success") {
                 $("#attendees_leads-modal-body").html(data).animate({width: "100%"});
-            }
-            else if (status == "error") {
+            } else if (status == "error") {
                 $(".for-pagination-contacts").html("Something Went Wrong Try Again Later...");
             }
         });
@@ -373,8 +357,7 @@ $("body").on("click", ".checklead", function (e) {
     if ($(this).prop("checked") == true) {
         if (!($(this).val() in $lids))
             $lids[$(this).val()] = $(this).parent().next().text().trim();
-    }
-    else {
+    } else {
         delete $lids[$(this).val()];
     }
     // console.log($lids)
@@ -382,7 +365,11 @@ $("body").on("click", ".checklead", function (e) {
 $("body").on("click", "#close-attendees-leads-model", function (e) {
     // console.log($lids)
     $("#selectedleads").html("");
-    $("#leads_name").parent().after("<div id="selectedleads"></div>");
+    $("#leads_name").parent().after("<div id="
+    selectedleads
+    "></div>"
+)
+    ;
     for (a in $lids) {
         if ($.isNumeric(a)) {
             strr = '<input id="attendees_leads" type="hidden" name="attendees_leads" value="' + a + '"/>';
@@ -420,8 +407,7 @@ $("body").on("click", "#assign-user", function (e) {
                     alert("We Regret, there is an issue!! Try again.");
                     window.location = "/";
                 }
-            }
-            else {
+            } else {
                 console.log(status)
             }
         });
@@ -460,8 +446,7 @@ $("body").on("click", "#assigned-user-modal-body .paginate-me-users", function (
         function (data, status, xhr) {
             if (status == "success") {
                 $("#assigned-user-modal-body").html(data).animate({width: "100%"});
-            }
-            else if (status == "error") {
+            } else if (status == "error") {
                 $("#assigned-user-modal-body .paginate-me-users").html("Something Went Wrong Try Again Later...");
             }
         });
@@ -470,7 +455,11 @@ $("body").on("click", "#assigned-user-modal-body .paginate-me-users", function (
 function getOtherFields(data) {
     ///////////////////ASSGNED USERS////////////////////////////////////////////
     $(".selected-assigned-users").html("");
-    $(".assigned_users_error").before("<div class="selected-assigned-users"></div>");
+    $(".assigned_users_error").before("<div class="
+    selected - assigned - users
+    "></div>"
+)
+    ;
     for (a in data["assigned_users"]) {
         if ($.isNumeric(a)) {
             strr = '<input class="assigned_users" type="hidden" name="assigned_users" value="' + a + '"/>';
@@ -482,7 +471,11 @@ function getOtherFields(data) {
     ///////////////////END  ASSGNED USERS////////////////////////////////////////////
     /////////////////// ATTENDEES LEADS////////////////////////////////////////////
     $("#selectedleads").html("");
-    $("#leads_name").parent().after("<div id="selectedleads"></div>");
+    $("#leads_name").parent().after("<div id="
+    selectedleads
+    "></div>"
+)
+    ;
     for (a in data["attendees_leads"]) {
         if ($.isNumeric(a)) {
             strr = '<input id="attendees_leads" type="hidden" name="attendees_leads" value="' + a + '"/>';
@@ -504,7 +497,11 @@ function getOtherFields(data) {
     /////////////////// END ATTENDEES CONTACTA////////////////////////////////////////////
     /////////////////// ATTENDEES USERS////////////////////////////////////////////
     $(".selectedusers").html("");
-    $(".attendees-users-user_name").parent().after("<div class="selectedusers"></div>");
+    $(".attendees-users-user_name").parent().after("<div class="
+    selectedusers
+    "></div>"
+)
+    ;
     for (a in data["attendees_user"]) {
         if ($.isNumeric(a)) {
             strr = '<input id="attendees_user" type="hidden" name="attendees_user" value="' + a + '"/>';
@@ -544,7 +541,12 @@ $("body").on("click", ".searchmeetings", function (e) {
             if (status == "success") {
                 // console.log(data)
                 if (data["Event"] == "DoesNotExist") {
-                    $(".for-pagination").html("<div class="heading text-center"> No Meetings Found </div>");
+                    $(".for-pagination").html("<div class="
+                    heading
+                    text - center
+                    "> No Meetings Found </div>"
+                )
+                    ;
                 } else {
                     $(".for-pagination").html(data);
                 }
@@ -560,8 +562,7 @@ $("body").on("click", ".searchmeetings", function (e) {
                     window.location = "/";
                     console.log("Something Went Wrong!!!");
                 }
-            }
-            else {
+            } else {
                 console.log(status);
             }
         });
@@ -590,8 +591,7 @@ $("body").on("click", "#created-user", function (e) {
                     window.location = "/";
                     console.log("Something Went Wrong!!!");
                 }
-            }
-            else {
+            } else {
                 console.log(status);
             }
         });
@@ -625,8 +625,7 @@ $("body").on("click", "#created-user-modal-body .paginate-me-users", function (e
         function (data, status, xhr) {
             if (status == "success") {
                 $("#created-user-modal-body").html(data).animate({width: "100%"});
-            }
-            else if (status == "error") {
+            } else if (status == "error") {
                 $("#created-user-modal-body .paginate-me-users").html("Something Went Wrong Try Again Later...");
             }
         });

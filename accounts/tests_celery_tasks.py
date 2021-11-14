@@ -30,5 +30,5 @@ class TestCeleryTasks(AccountCreateTest, TestCase):
         self.assertEqual('SUCCESS', task.state)
 
         task = send_email_to_assigned_user.apply(
-            ([self.user.id, self.user1.id, ], self.account.id,),)
+            ([self.user.id, self.user1.id, ], self.account.id,), )
         self.assertEqual('SUCCESS', task.state)

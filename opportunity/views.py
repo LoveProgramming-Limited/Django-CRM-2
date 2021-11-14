@@ -1,28 +1,29 @@
 import json
+
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.sites.shortcuts import get_current_site
-from django.core.mail import EmailMessage
+from django.core.exceptions import PermissionDenied
+from django.db.models import Q
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
-from django.template.loader import render_to_string
+from django.urls import reverse
 from django.views.generic import (CreateView, DetailView,
                                   ListView, TemplateView, View)
+
 from accounts.models import Account, Tags
+from common.access_decorators_mixins import (
+    sales_access_required, SalesAccessRequiredMixin)
 from common.models import User, Comment, Attachments
+from common.tasks import send_email_user_mentions
 from common.utils import STAGES, SOURCES, CURRENCY_CODES
 from contacts.models import Contact
 from opportunity.forms import (OpportunityForm, OpportunityCommentForm,
                                OpportunityAttachmentForm)
 from opportunity.models import Opportunity
-from django.urls import reverse
-from django.db.models import Q
-from django.core.exceptions import PermissionDenied
-from common.tasks import send_email_user_mentions
 from opportunity.tasks import send_email_to_assigned_user
-from common.access_decorators_mixins import (
-    sales_access_required, marketing_access_required, SalesAccessRequiredMixin, MarketingAccessRequiredMixin)
 from teams.models import Teams
+
 
 class OpportunityListView(SalesAccessRequiredMixin, LoginRequiredMixin, TemplateView):
     model = Opportunity
@@ -39,7 +40,7 @@ class OpportunityListView(SalesAccessRequiredMixin, LoginRequiredMixin, Template
                 Q(created_by=self.request.user.id))
 
         if self.request.GET.get('tag', None):
-            queryset = queryset.filter(tags__in = self.request.GET.getlist('tag'))
+            queryset = queryset.filter(tags__in=self.request.GET.getlist('tag'))
 
         request_post = self.request.POST
         if request_post:
@@ -79,10 +80,10 @@ class OpportunityListView(SalesAccessRequiredMixin, LoginRequiredMixin, Template
             context["request_tags"] = None
         search = False
         if (
-            self.request.POST.get('name') or self.request.POST.get('stage') or
-            self.request.POST.get('lead_source') or
-            self.request.POST.get('account') or
-            self.request.POST.get('contacts')
+                self.request.POST.get('name') or self.request.POST.get('stage') or
+                self.request.POST.get('lead_source') or
+                self.request.POST.get('account') or
+                self.request.POST.get('contacts')
         ):
             search = True
 
@@ -154,7 +155,7 @@ def create_opportunity(request):
             current_site = get_current_site(request)
             recipients = list(opportunity_obj.assigned_to.all().values_list('id', flat=True))
             send_email_to_assigned_user.delay(recipients, opportunity_obj.id, domain=current_site.domain,
-                protocol=request.scheme)
+                                              protocol=request.scheme)
 
             if request.POST.getlist('contacts', []):
                 opportunity_obj.contacts.add(
@@ -184,7 +185,7 @@ def create_opportunity(request):
             if request.POST.get('from_account'):
                 from_account = request.POST.get('from_account')
                 success_url = reverse("accounts:view_account", kwargs={
-                                      'pk': from_account})
+                    'pk': from_account})
                 # print(success_url)
             return JsonResponse({'error': False, 'success_url': success_url})
         return JsonResponse({'error': True, 'errors': form.errors})
@@ -350,7 +351,7 @@ def update_opportunity(request, pk):
             assigned_to_list = list(opportunity_obj.assigned_to.all().values_list('id', flat=True))
             recipients = list(set(assigned_to_list) - set(previous_assigned_to_users))
             send_email_to_assigned_user.delay(recipients, opportunity_obj.id, domain=current_site.domain,
-                protocol=request.scheme)
+                                              protocol=request.scheme)
 
             if request.POST.getlist('contacts', []):
                 opportunity_obj.contacts.add(
@@ -379,7 +380,7 @@ def update_opportunity(request, pk):
             if request.POST.get('from_account'):
                 from_account = request.POST.get('from_account')
                 success_url = reverse("accounts:view_account", kwargs={
-                                      'pk': from_account})
+                    'pk': from_account})
             return JsonResponse({'error': False, 'success_url': success_url})
         return JsonResponse({'error': True, 'errors': form.errors})
     context = {}
@@ -418,7 +419,7 @@ class DeleteOpportunityView(SalesAccessRequiredMixin, LoginRequiredMixin, View):
     def post(self, request, *args, **kwargs):
         self.object = get_object_or_404(Opportunity, id=kwargs.get("pk"))
         if (self.request.user.role == "ADMIN" or
-            self.request.user.is_superuser or
+                self.request.user.is_superuser or
                 self.request.user == self.object.created_by):
             self.object.delete()
             if request.is_ajax():
@@ -442,7 +443,7 @@ class GetContactView(LoginRequiredMixin, View):
         else:
             contacts = Contact.objects.all()
         data = {contact.pk:
-                contact.first_name for contact in contacts.distinct()}
+                    contact.first_name for contact in contacts.distinct()}
         return JsonResponse(data)
 
 
@@ -477,7 +478,7 @@ class AddCommentView(LoginRequiredMixin, CreateView):
         comment_id = comment.id
         current_site = get_current_site(self.request)
         send_email_user_mentions.delay(comment_id, 'opportunity', domain=current_site.domain,
-            protocol=self.request.scheme)
+                                       protocol=self.request.scheme)
         return JsonResponse({
             "comment_id": comment.id, "comment": comment.comment,
             "commented_on": comment.commented_on,
@@ -511,7 +512,7 @@ class UpdateCommentView(LoginRequiredMixin, View):
         comment_id = self.comment_obj.id
         current_site = get_current_site(self.request)
         send_email_user_mentions.delay(comment_id, 'opportunity', domain=current_site.domain,
-            protocol=self.request.scheme)
+                                       protocol=self.request.scheme)
         return JsonResponse({
             "commentid": self.comment_obj.id,
             "comment": self.comment_obj.comment,
@@ -593,7 +594,7 @@ class DeleteAttachmentsView(LoginRequiredMixin, View):
         self.object = get_object_or_404(
             Attachments, id=request.POST.get("attachment_id"))
         if (request.user == self.object.created_by or
-            request.user.is_superuser or
+                request.user.is_superuser or
                 request.user.role == 'ADMIN'):
             self.object.delete()
             data = {"aid": request.POST.get("attachment_id")}

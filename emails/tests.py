@@ -1,8 +1,9 @@
-from django.test import TestCase
 from django.test import Client
+from django.test import TestCase
+
 from common.models import User
-from emails.models import Email
 from emails.forms import EmailForm
+from emails.models import Email
 
 
 class UserCreation(TestCase):
@@ -67,7 +68,8 @@ class EmailTestCase(UserCreation, TestCase):
         }
         response = self.client.post(url, data)
         self.assertEqual(response.status_code, 200)
-# email_trash_delete/
+
+    # email_trash_delete/
 
     def test_email_send(self):
         url = "/emails/compose/"
@@ -138,7 +140,6 @@ class EmailTestCase(UserCreation, TestCase):
         url = "/emails/email_imp_list/"
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
-
 
     # def test_email_move_to_trash(self):
     #     url = "/emails/email_move_to_trash/" + str(self.email.pk) + "/"

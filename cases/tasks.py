@@ -1,7 +1,5 @@
 from celery.task import task
-from django.conf import settings
-from django.core.mail import EmailMultiAlternatives, EmailMessage
-from django.db.models import Q
+from django.core.mail import EmailMessage
 from django.shortcuts import reverse
 from django.template.loader import render_to_string
 
@@ -25,7 +23,7 @@ def send_email_to_assigned_user(recipients, case_id, domain='demo.django-crm.io'
                 recipients_list.append(user.email)
                 context = {}
                 context["url"] = protocol + '://' + domain + \
-                    reverse('cases:view_case', args=(case.id,))
+                                 reverse('cases:view_case', args=(case.id,))
                 context["user"] = user
                 context["case"] = case
                 context["created_by"] = created_by

@@ -51,8 +51,8 @@ def upload_csv_file(data, invalid_data, user, contact_lists):
             contact.save()
         else:
             if not DuplicateContacts.objects.filter(
-                contacts=contact,
-                contact_list=ContactList.objects.get(id=int(contact_lists[0]))).exists():
+                    contacts=contact,
+                    contact_list=ContactList.objects.get(id=int(contact_lists[0]))).exists():
                 DuplicateContacts.objects.create(
                     contacts=contact,
                     contact_list=ContactList.objects.get(id=int(contact_lists[0])))
@@ -141,9 +141,10 @@ def run_campaign(campaign, domain='demo.django-crm.io', protocol='https'):
                 else:
                     from_email = campaign.created_by.email
                 reply_to_email = str(from_email) + ' <' + \
-                    str(message_id + '@' + domain_name + '') + '>'
+                                 str(message_id + '@' + domain_name + '') + '>'
             if not (each_contact.is_bounced or each_contact.is_unsubscribed):
-                if ((each_contact.email not in blocked_emails) and (each_contact.email.split('@')[-1] not in blocked_domains)):
+                if ((each_contact.email not in blocked_emails) and (
+                        each_contact.email.split('@')[-1] not in blocked_domains)):
                     # domain_url = settings.URL_FOR_LINKS
                     domain_url = protocol + '://' + domain
                     img_src_url = domain_url + reverse('marketing:campaign_open', kwargs={
@@ -158,22 +159,22 @@ def run_campaign(campaign, domain='demo.django-crm.io', protocol='https'):
 
                     unsubscribe_from_campaign_url = reverse(
                         'marketing:unsubscribe_from_campaign', kwargs={'contact_id': each_contact.id,
-                                                                    'campaign_id': campaign.id})
+                                                                       'campaign_id': campaign.id})
                     unsubscribe_from_campaign_html = "<br><br/><a href={}>Unsubscribe</a>".format(
                         domain_url + unsubscribe_from_campaign_url)
                     names_dict = {'company_name': each_contact.company_name if each_contact.company_name else '',
-                                'last_name': each_contact.last_name if each_contact.last_name else '',
-                                'city': each_contact.city if each_contact.city else '',
-                                'state': each_contact.state if each_contact.state else '',
-                                'first_name': each_contact.name,
-                                'email': each_contact.email, 'email_id': each_contact.id,
-                                'name': each_contact.name + ' ' + each_contact.last_name if each_contact.last_name else '',
-                                'unsubscribe_from_campaign_url': unsubscribe_from_campaign_url}
+                                  'last_name': each_contact.last_name if each_contact.last_name else '',
+                                  'city': each_contact.city if each_contact.city else '',
+                                  'state': each_contact.state if each_contact.state else '',
+                                  'first_name': each_contact.name,
+                                  'email': each_contact.email, 'email_id': each_contact.id,
+                                  'name': each_contact.name + ' ' + each_contact.last_name if each_contact.last_name else '',
+                                  'unsubscribe_from_campaign_url': unsubscribe_from_campaign_url}
 
                     html = Template(html).render(Context(names_dict))
                     mail_html = html + link + unsubscribe_from_campaign_html
                     from_email = str(campaign.from_name) + "<" + \
-                        str(campaign.from_email) + '>'
+                                 str(campaign.from_email) + '>'
                     to_email = [each_contact.email]
                     send_campaign_mail(
                         subject, mail_html, from_email, to_email, [], [reply_to_email], attachments)
@@ -230,8 +231,8 @@ def send_scheduled_campaigns():
                 sent_time, each.timezone, to_utc=True)
 
             if (
-                str(each.schedule_date_time.date()) == str(sent_time.date()) and
-                str(schedule_date_time.hour) == str(sent_time.hour)
+                    str(each.schedule_date_time.date()) == str(sent_time.date()) and
+                    str(schedule_date_time.hour) == str(sent_time.hour)
             ):
                 run_campaign.delay(each.id)
                 CampaignCompleted.objects.create(
@@ -270,7 +271,8 @@ def send_campaign_email_to_admin_contact(campaign, domain='demo.django-crm.io', 
         blocked_domains = BlockedDomain.objects.values_list('domain', flat=True)
         blocked_emails = BlockedEmail.objects.values_list('email', flat=True)
         for each_contact in contacts:
-            if ((each_contact.email not in blocked_emails) and (each_contact.email.split('@')[-1] not in blocked_domains)):
+            if ((each_contact.email not in blocked_emails) and (
+                    each_contact.email.split('@')[-1] not in blocked_domains)):
                 html = default_html
                 if campaign.reply_to_email:
                     reply_to_email = campaign.reply_to_email
@@ -281,7 +283,7 @@ def send_campaign_email_to_admin_contact(campaign, domain='demo.django-crm.io', 
                     else:
                         from_email = campaign.created_by.email
                     reply_to_email = str(from_email) + ' <' + \
-                        str(settings.EMAIL_HOST_USER + '@' + domain_name + '') + '>'
+                                     str(settings.EMAIL_HOST_USER + '@' + domain_name + '') + '>'
 
                 # domain_url = settings.URL_FOR_LINKS
                 domain_url = protocol + '://' + domain
@@ -311,7 +313,7 @@ def send_campaign_email_to_admin_contact(campaign, domain='demo.django-crm.io', 
                 html = Template(html).render(Context({'email_id': each_contact.id}))
                 mail_html = html
                 from_email = str(campaign.from_name) + "<" + \
-                    str(campaign.from_email) + '>'
+                             str(campaign.from_email) + '>'
                 to_email = [each_contact.email]
                 send_campaign_mail(
                     subject, mail_html, from_email, to_email, [], [reply_to_email], attachments)

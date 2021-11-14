@@ -1,10 +1,11 @@
 from django import forms
-from .models import Account, Email
-from common.models import Comment, Attachments, User
-from leads.models import Lead
-from contacts.models import Contact
 from django.db.models import Q
+
+from common.models import Comment, Attachments
+from contacts.models import Contact
+from leads.models import Lead
 from teams.models import Teams
+from .models import Account, Email
 
 
 class AccountForm(forms.ModelForm):
@@ -38,18 +39,21 @@ class AccountForm(forms.ModelForm):
         self.fields['billing_postcode'].widget.attrs.update({
             'placeholder': 'Postcode'})
         self.fields["billing_country"].choices = [
-            ("", "--Country--"), ] + list(self.fields["billing_country"].choices)[1:]
+                                                     ("", "--Country--"), ] + list(
+            self.fields["billing_country"].choices)[1:]
         # self.fields["lead"].queryset = Lead.objects.all(
         # ).exclude(status='closed')
         if request_user.role == 'ADMIN':
             self.fields["lead"].queryset = Lead.objects.filter().exclude(
                 status='closed').order_by('title')
             self.fields["contacts"].queryset = Contact.objects.filter()
-            self.fields["teams"].choices = [(team.get('id'), team.get('name')) for team in Teams.objects.all().values('id', 'name')]
+            self.fields["teams"].choices = [(team.get('id'), team.get('name')) for team in
+                                            Teams.objects.all().values('id', 'name')]
             self.fields["teams"].required = False
         else:
             self.fields["lead"].queryset = Lead.objects.filter(
-                Q(assigned_to__in=[request_user]) | Q(created_by=request_user)).exclude(status='closed').order_by('title')
+                Q(assigned_to__in=[request_user]) | Q(created_by=request_user)).exclude(status='closed').order_by(
+                'title')
             self.fields["contacts"].queryset = Contact.objects.filter(
                 Q(assigned_to__in=[request_user]) | Q(created_by=request_user))
             self.fields["teams"].required = False
@@ -95,6 +99,7 @@ class AccountAttachmentForm(forms.ModelForm):
 
 class EmailForm(forms.ModelForm):
     recipients = forms.CharField()
+
     # message_subject = forms.CharField(max_length=500)
     # message_body = forms.CharField(widget=forms.Textarea)
     # timezone = forms.CharField(max_length=200)
@@ -123,7 +128,7 @@ class EmailForm(forms.ModelForm):
     class Meta:
         model = Email
         fields = ['recipients', 'message_subject', 'from_email',
-            'message_body', 'timezone', 'scheduled_date_time', 'scheduled_later']
+                  'message_body', 'timezone', 'scheduled_date_time', 'scheduled_later']
 
     # def clean_recipients(self):
     #     recipients = self.cleaned_data.get('recipients')
@@ -147,7 +152,6 @@ class EmailForm(forms.ModelForm):
                 raise forms.ValidationError('This Field is required.')
 
         return scheduled_date_time
-
 
     def clean_message_body(self):
         message_body = self.cleaned_data.get('message_body')

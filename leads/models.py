@@ -11,6 +11,7 @@ from common.utils import (COUNTRIES, LEAD_SOURCE, LEAD_STATUS,
 from contacts.models import Contact
 from teams.models import Teams
 
+
 class Lead(models.Model):
     title = models.CharField(
         pgettext_lazy("Treatment Pronouns for the customer",

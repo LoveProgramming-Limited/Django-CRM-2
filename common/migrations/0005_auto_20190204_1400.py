@@ -11,7 +11,6 @@ def generate_document_status(apps, schema_editor):
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ('common', '0004_attachments_case'),
     ]
@@ -24,7 +23,8 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='document',
             name='status',
-            field=models.CharField(choices=[('active', 'active'), ('inactive', 'inactive')], default='active', max_length=64),
+            field=models.CharField(choices=[('active', 'active'), ('inactive', 'inactive')], default='active',
+                                   max_length=64),
         ),
         migrations.RunPython(generate_document_status)
     ]

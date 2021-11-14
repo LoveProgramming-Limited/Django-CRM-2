@@ -9,42 +9,38 @@ from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
-from django.contrib.auth.hashers import check_password
 from django.contrib.auth.mixins import AccessMixin, LoginRequiredMixin
 from django.contrib.auth.views import PasswordResetView
-from django.contrib.sites.shortcuts import get_current_site
 from django.core.exceptions import PermissionDenied
 from django.core.mail import EmailMessage
 from django.db.models import Q
 from django.http import (Http404, HttpResponse, HttpResponseRedirect,
-    JsonResponse)
+                         JsonResponse)
 from django.shortcuts import get_object_or_404, redirect, render
-from django.template.loader import render_to_string
 from django.urls import reverse, reverse_lazy
 from django.utils import timezone
-from django.utils.encoding import force_bytes, force_text
-from django.utils.http import urlsafe_base64_decode, urlsafe_base64_encode
+from django.utils.encoding import force_text
+from django.utils.http import urlsafe_base64_decode
 from django.views.generic import (CreateView, DeleteView, DetailView,
-    TemplateView, UpdateView, View)
+                                  TemplateView, UpdateView, View)
 
 from accounts.models import Account, Tags
 from cases.models import Case
-from common.access_decorators_mixins import (MarketingAccessRequiredMixin,
-    SalesAccessRequiredMixin, marketing_access_required, sales_access_required,
-    admin_login_required)
+from common.access_decorators_mixins import (SalesAccessRequiredMixin, sales_access_required,
+                                             admin_login_required)
 from common.forms import (APISettingsForm, ChangePasswordForm, DocumentForm,
-    LoginForm, PasswordResetEmailForm, UserCommentForm, UserForm)
+                          LoginForm, PasswordResetEmailForm, UserCommentForm, UserForm)
 from common.models import (APISettings, Attachments, Comment, Document, Google,
-    Profile, User)
+                           Profile, User)
 from common.tasks import (resend_activation_link_to_user,
-    send_email_to_new_user, send_email_user_delete, send_email_user_status)
+                          send_email_to_new_user, send_email_user_delete, send_email_user_status)
 from common.token_generator import account_activation_token
 from common.utils import ROLES
 from contacts.models import Contact
 from leads.models import Lead
+from marketing.models import ContactEmailCampaign, BlockedDomain, BlockedEmail
 from opportunity.models import Opportunity
 from teams.models import Teams
-from marketing.models import ContactEmailCampaign, BlockedDomain, BlockedEmail 
 
 
 def handler404(request, exception):
@@ -133,7 +129,6 @@ class ProfileView(LoginRequiredMixin, TemplateView):
     template_name = "profile.html"
 
     def get_context_data(self, **kwargs):
-
         context = super(ProfileView, self).get_context_data(**kwargs)
         context["user_obj"] = self.request.user
         return context
@@ -178,8 +173,8 @@ class LoginView(TemplateView):
                         "GP_CLIENT_ID": settings.GP_CLIENT_ID,
                         "error": True,
                         "message":
-                        "Your username and password didn't match. \
-                        Please try again."
+                            "Your username and password didn't match. \
+                            Please try again."
                     })
                 return render(request, "login.html", {
                     "ENABLE_GOOGLE_LOGIN": settings.ENABLE_GOOGLE_LOGIN,
@@ -187,7 +182,7 @@ class LoginView(TemplateView):
                     "GP_CLIENT_ID": settings.GP_CLIENT_ID,
                     "error": True,
                     "message":
-                    "Your Account is inactive. Please Contact Administrator"
+                        "Your Account is inactive. Please Contact Administrator"
                 })
             return render(request, "login.html", {
                 "ENABLE_GOOGLE_LOGIN": settings.ENABLE_GOOGLE_LOGIN,
@@ -195,7 +190,7 @@ class LoginView(TemplateView):
                 "GP_CLIENT_ID": settings.GP_CLIENT_ID,
                 "error": True,
                 "message":
-                "Your Account is not Found. Please Contact Administrator"
+                    "Your Account is not Found. Please Contact Administrator"
             })
 
         return render(request, "login.html", {
@@ -266,6 +261,7 @@ class CreateUserView(AdminRequiredMixin, CreateView):
     model = User
     form_class = UserForm
     template_name = "create.html"
+
     # success_url = '/users/list/'
 
     def form_valid(self, form):
@@ -335,7 +331,7 @@ class UserDetailView(AdminRequiredMixin, DetailView):
         context.update({
             "user_obj": user_obj,
             "opportunity_list":
-            Opportunity.objects.filter(assigned_to=user_obj.id),
+                Opportunity.objects.filter(assigned_to=user_obj.id),
             "contacts": Contact.objects.filter(assigned_to=user_obj.id),
             "cases": Case.objects.filter(assigned_to=user_obj.id),
             # "accounts": Account.objects.filter(assigned_to=user_obj.id),
@@ -354,7 +350,7 @@ class UpdateUserView(LoginRequiredMixin, UpdateView):
         user = form.save(commit=False)
         if self.request.is_ajax():
             if (self.request.user.role != "ADMIN" and not
-                    self.request.user.is_superuser):
+            self.request.user.is_superuser):
                 if self.request.user.id != self.object.id:
                     data = {'error_403': True, 'error': True}
                     return JsonResponse(data)
@@ -524,9 +520,9 @@ class DocumentListView(SalesAccessRequiredMixin, LoginRequiredMixin, TemplateVie
 
         search = False
         if (
-            self.request.POST.get('doc_name') or
-            self.request.POST.get('status') or
-            self.request.POST.get('shared_to')
+                self.request.POST.get('doc_name') or
+                self.request.POST.get('status') or
+                self.request.POST.get('shared_to')
         ):
             search = True
 
@@ -644,7 +640,7 @@ def download_document(request, pk):
                     response = HttpResponse(
                         fh.read(), content_type="application/vnd.ms-excel")
                     response['Content-Disposition'] = 'inline; filename=' + \
-                        os.path.basename(file_path)
+                                                      os.path.basename(file_path)
                     return response
         else:
             file_path = doc_obj.document_file
@@ -661,7 +657,7 @@ def download_document(request, pk):
                     response = HttpResponse(
                         fh.read(), content_type="application/vnd.ms-excel")
                     response['Content-Disposition'] = 'inline; filename=' + \
-                        os.path.basename(file_name)
+                                                      os.path.basename(file_name)
                 os.remove(file_name)
                 return response
             except botocore.exceptions.ClientError as e:
@@ -674,7 +670,7 @@ def download_document(request, pk):
     raise Http404
 
 
-def download_attachment(request, pk): # pragma: no cover
+def download_attachment(request, pk):  # pragma: no cover
     attachment_obj = Attachments.objects.filter(id=pk).last()
     if attachment_obj:
         if settings.STORAGE_TYPE == "normal":
@@ -685,7 +681,7 @@ def download_attachment(request, pk): # pragma: no cover
                     response = HttpResponse(
                         fh.read(), content_type="application/vnd.ms-excel")
                     response['Content-Disposition'] = 'inline; filename=' + \
-                        os.path.basename(file_path)
+                                                      os.path.basename(file_path)
                     return response
         else:
             file_path = attachment_obj.attachment
@@ -701,7 +697,7 @@ def download_attachment(request, pk): # pragma: no cover
                     response = HttpResponse(
                         fh.read(), content_type="application/vnd.ms-excel")
                     response['Content-Disposition'] = 'inline; filename=' + \
-                        os.path.basename(file_name)
+                                                      os.path.basename(file_name)
                 os.remove(file_name)
                 return response
             except botocore.exceptions.ClientError as e:
@@ -724,7 +720,7 @@ def change_user_status(request, pk):
     current_site = request.get_host()
     status_changed_user = request.user.email
     send_email_user_status.delay(
-        pk, status_changed_user=status_changed_user, domain=current_site , protocol=request.scheme)
+        pk, status_changed_user=status_changed_user, domain=current_site, protocol=request.scheme)
     return HttpResponseRedirect('/users/list/')
 
 
@@ -773,6 +769,7 @@ def remove_comment(request):
         data = {'error': "You don't have permission to delete this comment."}
         return JsonResponse(data)
 
+
 @login_required
 @admin_login_required
 def api_settings(request):
@@ -813,7 +810,7 @@ def api_settings(request):
             if request.POST.get('contact_email', None):
                 contacts_filter = contacts_filter.filter(email__icontains=request.POST.get('contact_email', None))
 
-            context['contacts']= contacts_filter.distinct()
+            context['contacts'] = contacts_filter.distinct()
 
         if request.POST.get('filter_blocked_domains', None):
             if request.POST.get('domain', ''):
@@ -821,7 +818,7 @@ def api_settings(request):
             if request.POST.get('created_by', ''):
                 blocked_domains = blocked_domains.filter(created_by_id=request.POST.get('created_by', ''))
 
-            context['blocked_domains']= blocked_domains
+            context['blocked_domains'] = blocked_domains
 
         if request.POST.get('filter_blocked_emails', None):
             if request.POST.get('email', ''):
@@ -912,8 +909,8 @@ def update_api_settings(request, pk):
         'form': form, "setting": api_settings,
         'users': users, 'assign_to_list': assign_to_list,
         'assigned_to_list':
-        json.dumps(
-            [setting.id for setting in api_settings.lead_assigned_to.all() if setting])
+            json.dumps(
+                [setting.id for setting in api_settings.lead_assigned_to.all() if setting])
     }
     return render(request, 'settings/update.html', data)
 
@@ -937,11 +934,11 @@ def change_passsword_by_admin(request):
             user.set_password(request.POST.get("new_passwoord"))
             user.save()
             mail_subject = 'Crm Account Password Changed'
-            message = "<h3><b>hello</b> <i>" + user.username +\
-                "</i></h3><br><h2><p> <b>Your account password has been changed !\
-                 </b></p></h2>" \
-                + "<br> <p><b> New Password</b> : <b><i>" + \
-                request.POST.get("new_passwoord") + "</i><br></p>"
+            message = "<h3><b>hello</b> <i>" + user.username + \
+                      "</i></h3><br><h2><p> <b>Your account password has been changed !\
+                       </b></p></h2>" \
+                      + "<br> <p><b> New Password</b> : <b><i>" + \
+                      request.POST.get("new_passwoord") + "</i><br></p>"
             email = EmailMessage(mail_subject, message, to=[user.email])
             email.content_subtype = "html"
             email.send()
@@ -949,13 +946,13 @@ def change_passsword_by_admin(request):
     raise PermissionDenied
 
 
-def google_login(request): # pragma: no cover
+def google_login(request):  # pragma: no cover
     if 'code' in request.GET:
         params = {
             'grant_type': 'authorization_code',
             'code': request.GET.get('code'),
             'redirect_uri': 'http://' +
-            request.META['HTTP_HOST'] + reverse('common:google_login'),
+                            request.META['HTTP_HOST'] + reverse('common:google_login'),
             'client_id': settings.GP_CLIENT_ID,
             'client_secret': settings.GP_CLIENT_SECRET
         }
@@ -1036,14 +1033,14 @@ def google_login(request): # pragma: no cover
     else:
         next_url = '1235dfghjkf123'
     rty = "https://accounts.google.com/o/oauth2/auth?client_id=" + \
-        settings.GP_CLIENT_ID + "&response_type=code"
+          settings.GP_CLIENT_ID + "&response_type=code"
     rty += "&scope=https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/userinfo.email&redirect_uri=" \
-        + 'http://' + request.META['HTTP_HOST'] + \
-        reverse('common:google_login') + "&state=" + next_url
+           + 'http://' + request.META['HTTP_HOST'] + \
+           reverse('common:google_login') + "&state=" + next_url
     return HttpResponseRedirect(rty)
 
 
-def create_lead_from_site(request): # pragma: no cover
+def create_lead_from_site(request):  # pragma: no cover
     allowed_domains = ['micropyramid.com', 'test.microsite.com:8000', ]
     # add origin_domain = request.get_host() in the post body
     if (request.get_host() in ['sales.micropyramid.com', ] and request.POST.get('origin_domain') in allowed_domains):
@@ -1051,7 +1048,7 @@ def create_lead_from_site(request): # pragma: no cover
             if request.POST.get('full_name', None):
                 lead = Lead.objects.create(title=request.POST.get('full_name'), email=request.POST.get(
                     'email'), phone=request.POST.get('phone'), description=request.POST.get('message'),
-                    created_from_site=True)
+                                           created_from_site=True)
                 recipients = User.objects.filter(
                     role='ADMIN').values_list('id', flat=True)
                 lead.assigned_to.add(*recipients)
@@ -1064,7 +1061,7 @@ def create_lead_from_site(request): # pragma: no cover
     return HttpResponseBadRequest('Bad Request')
 
 
-def activate_user(request, uidb64, token, activation_key): # pragma: no cover
+def activate_user(request, uidb64, token, activation_key):  # pragma: no cover
     profile = get_object_or_404(Profile, activation_key=activation_key)
     if profile.user:
         if timezone.now() > profile.key_expires:
@@ -1096,7 +1093,7 @@ def activate_user(request, uidb64, token, activation_key): # pragma: no cover
                 return HttpResponse('Activation link is invalid!')
 
 
-def resend_activation_link(request, userId): # pragma: no cover
+def resend_activation_link(request, userId):  # pragma: no cover
     user = get_object_or_404(User, pk=userId)
     kwargs = {'user_email': user.email, 'domain': request.get_host(), 'protocol': request.scheme}
     resend_activation_link_to_user.delay(**kwargs)

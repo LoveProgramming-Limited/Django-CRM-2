@@ -1,11 +1,9 @@
 from celery.task import task
-from django.conf import settings
 from django.core.mail import EmailMessage
 from django.shortcuts import reverse
 from django.template.loader import render_to_string
 
 from common.models import User
-from contacts.models import Contact
 from events.models import Event
 from marketing.models import BlockedDomain, BlockedEmail
 
@@ -20,7 +18,7 @@ def send_email(event_id, recipients, domain='demo.django-crm.io', protocol='http
     context['event_created_by'] = event.created_by
     context['event_date_of_meeting'] = event.date_of_meeting
     context["url"] = protocol + '://' + domain + \
-        reverse('events:detail_view', args=(event.id,))
+                     reverse('events:detail_view', args=(event.id,))
     # recipients = event.assigned_to.filter(is_active=True)
     blocked_domains = BlockedDomain.objects.values_list('domain', flat=True)
     blocked_emails = BlockedEmail.objects.values_list('email', flat=True)
@@ -78,14 +76,14 @@ def send_email(event_id, recipients, domain='demo.django-crm.io', protocol='http
     #         msg.content_subtype = "html"
     #         msg.send()
 
-        # might need to add contacts to TODO
-        # recipients = event.contacts.all()
-        # if recipients.count() > 0:
-        #     for recipient in recipients:
-        #         context['user'] = recipient.email
-        #         html_content = render_to_string(
-        #             'assigned_to_email_template.html', context=context)
-        #         msg = EmailMessage(
-        #             subject=subject, body=html_content, to=[recipient.email, ])
-        #         msg.content_subtype = "html"
-        #         msg.send
+    # might need to add contacts to TODO
+    # recipients = event.contacts.all()
+    # if recipients.count() > 0:
+    #     for recipient in recipients:
+    #         context['user'] = recipient.email
+    #         html_content = render_to_string(
+    #             'assigned_to_email_template.html', context=context)
+    #         msg = EmailMessage(
+    #             subject=subject, body=html_content, to=[recipient.email, ])
+    #         msg.content_subtype = "html"
+    #         msg.send

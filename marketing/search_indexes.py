@@ -1,4 +1,5 @@
 from haystack import indexes
+
 from marketing.models import Contact, FailedContact
 
 
@@ -28,7 +29,8 @@ class MarketingContactIndex(indexes.SearchIndex, indexes.Indexable):
         return obj.email.split('@')[-1]
 
     def prepare_contact_lists(self, obj):
-        return [[contact_list.id, contact_list.name if contact_list.name else ''] for contact_list in obj.contact_list.all()]
+        return [[contact_list.id, contact_list.name if contact_list.name else ''] for contact_list in
+                obj.contact_list.all()]
 
     def prepare_contact_lists_id(self, obj):
         return [contact_list.id for contact_list in obj.contact_list.all().order_by('id')]
@@ -55,7 +57,6 @@ class MarketingContactIndex(indexes.SearchIndex, indexes.Indexable):
         return self.get_model().objects.all()
 
 
-
 class MarketingFailedContactIndex(indexes.SearchIndex, indexes.Indexable):
     text = indexes.CharField(
         document=True, use_template=True, template_name='search/failed_contact_emails.txt')
@@ -74,7 +75,6 @@ class MarketingFailedContactIndex(indexes.SearchIndex, indexes.Indexable):
     contact_lists_name = indexes.MultiValueField()
     contact_lists_count = indexes.IntegerField()
 
-
     def get_model(self):
         return FailedContact
 
@@ -82,7 +82,8 @@ class MarketingFailedContactIndex(indexes.SearchIndex, indexes.Indexable):
         return obj.email.split('@')[-1]
 
     def prepare_contact_lists(self, obj):
-        return [[contact_list.id, contact_list.name if contact_list.name else ''] for contact_list in obj.contact_list.all()]
+        return [[contact_list.id, contact_list.name if contact_list.name else ''] for contact_list in
+                obj.contact_list.all()]
 
     def prepare_contact_lists_id(self, obj):
         return [contact_list.id for contact_list in obj.contact_list.all().order_by('id')]

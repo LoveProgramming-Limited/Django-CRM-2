@@ -2,6 +2,7 @@ from django.conf import settings
 from django.conf.urls.static import static
 from django.contrib.auth import views
 from django.urls import include, path
+
 from common.views import handler404, handler500
 
 app_name = 'crm'
@@ -28,7 +29,6 @@ urlpatterns = [
 
 if settings.DEBUG:
     urlpatterns = urlpatterns + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
-
 
 handler404 = handler404
 handler500 = handler500

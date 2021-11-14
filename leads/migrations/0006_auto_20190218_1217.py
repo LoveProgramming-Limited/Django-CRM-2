@@ -4,7 +4,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ('leads', '0005_auto_20190212_1708'),
     ]
@@ -13,6 +12,9 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='lead',
             name='status',
-            field=models.CharField(blank=True, choices=[('assigned', 'Assigned'), ('in process', 'In Process'), ('converted', 'Converted'), ('recycled', 'Recycled'), ('dead', 'Closed')], max_length=255, null=True, verbose_name='Status of Lead'),
+            field=models.CharField(blank=True, choices=[('assigned', 'Assigned'), ('in process', 'In Process'),
+                                                        ('converted', 'Converted'), ('recycled', 'Recycled'),
+                                                        ('dead', 'Closed')], max_length=255, null=True,
+                                   verbose_name='Status of Lead'),
         ),
     ]

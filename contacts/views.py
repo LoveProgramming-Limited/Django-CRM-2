@@ -1,26 +1,26 @@
 import json
+
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.sites.shortcuts import get_current_site
-from django.core.mail import EmailMessage
+from django.core.exceptions import PermissionDenied
+from django.db.models import Q
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect
-from django.template.loader import render_to_string
 from django.urls import reverse
 from django.views.generic import (
     CreateView, UpdateView, DetailView, TemplateView, View)
-from common.models import User, Comment, Attachments
+
+from accounts.models import Account
+from common.access_decorators_mixins import (
+    SalesAccessRequiredMixin)
 from common.forms import BillingAddressForm
+from common.models import User, Comment, Attachments
+from common.tasks import send_email_user_mentions
 from common.utils import COUNTRIES
-from contacts.models import Contact
 from contacts.forms import (ContactForm,
                             ContactCommentForm, ContactAttachmentForm)
-from accounts.models import Account
-from django.core.exceptions import PermissionDenied
-from django.db.models import Q
-from common.tasks import send_email_user_mentions
+from contacts.models import Contact
 from contacts.tasks import send_email_to_assigned_user
-from common.access_decorators_mixins import (
-    sales_access_required, marketing_access_required, SalesAccessRequiredMixin, MarketingAccessRequiredMixin)
 from teams.models import Teams
 
 
@@ -32,7 +32,7 @@ class ContactsListView(SalesAccessRequiredMixin, LoginRequiredMixin, TemplateVie
     def get_queryset(self):
         queryset = self.model.objects.all()
         if (self.request.user.role != "ADMIN" and not
-                self.request.user.is_superuser):
+        self.request.user.is_superuser):
             queryset = queryset.filter(
                 Q(assigned_to__in=[self.request.user]) |
                 Q(created_by=self.request.user))
@@ -66,11 +66,11 @@ class ContactsListView(SalesAccessRequiredMixin, LoginRequiredMixin, TemplateVie
             int(i) for i in self.request.POST.getlist('assigned_to', []) if i]
         search = False
         if (
-            self.request.POST.get('first_name') or
-            self.request.POST.get('city') or
-            self.request.POST.get('phone') or
-            self.request.POST.get(
-                'email') or self.request.POST.get('assigned_to')
+                self.request.POST.get('first_name') or
+                self.request.POST.get('city') or
+                self.request.POST.get('phone') or
+                self.request.POST.get(
+                    'email') or self.request.POST.get('assigned_to')
         ):
             search = True
         context["search"] = search
@@ -152,7 +152,7 @@ class CreateContactView(SalesAccessRequiredMixin, LoginRequiredMixin, CreateView
         current_site = get_current_site(self.request)
         recipients = assigned_to_list
         send_email_to_assigned_user.delay(recipients, contact_obj.id, domain=current_site.domain,
-            protocol=self.request.scheme)
+                                          protocol=self.request.scheme)
 
         if self.request.FILES.get('contact_attachment'):
             attachment = Attachments()
@@ -217,7 +217,7 @@ class ContactDetailView(SalesAccessRequiredMixin, LoginRequiredMixin, DetailView
         if self.request.user == context['object'].created_by:
             user_assgn_list.append(self.request.user.id)
         if (self.request.user.role != "ADMIN" and not
-                self.request.user.is_superuser):
+        self.request.user.is_superuser):
             if self.request.user.id not in user_assgn_list:
                 raise PermissionDenied
         assigned_data = []
@@ -235,12 +235,12 @@ class ContactDetailView(SalesAccessRequiredMixin, LoginRequiredMixin, DetailView
             users_mention = list(context['object'].assigned_to.all().values('username'))
 
         context.update({"comments":
-                        context["contact_record"].contact_comments.all(),
+                            context["contact_record"].contact_comments.all(),
                         'attachments':
-                        context["contact_record"].contact_attachment.all(),
+                            context["contact_record"].contact_attachment.all(),
                         "assigned_data": json.dumps(assigned_data),
-                        "tasks" : context['object'].contacts_tasks.all(),
-                        'users_mention':  users_mention,
+                        "tasks": context['object'].contacts_tasks.all(),
+                        'users_mention': users_mention,
                         })
         return context
 
@@ -330,7 +330,7 @@ class UpdateContactView(SalesAccessRequiredMixin, LoginRequiredMixin, UpdateView
         assigned_to_list = list(contact_obj.assigned_to.all().values_list('id', flat=True))
         recipients = list(set(assigned_to_list) - set(previous_assigned_to_users))
         send_email_to_assigned_user.delay(recipients, contact_obj.id, domain=current_site.domain,
-            protocol=self.request.scheme)
+                                          protocol=self.request.scheme)
 
         if self.request.FILES.get('contact_attachment'):
             attachment = Attachments()
@@ -366,7 +366,7 @@ class UpdateContactView(SalesAccessRequiredMixin, LoginRequiredMixin, UpdateView
         if self.request.user == context['contact_obj'].created_by:
             user_assgn_list.append(self.request.user.id)
         if (self.request.user.role != "ADMIN" and not
-                self.request.user.is_superuser):
+        self.request.user.is_superuser):
             if self.request.user.id not in user_assgn_list:
                 raise PermissionDenied
         context["address_obj"] = self.object.address
@@ -397,7 +397,7 @@ class RemoveContactView(SalesAccessRequiredMixin, LoginRequiredMixin, View):
         contact_id = kwargs.get("pk")
         self.object = get_object_or_404(Contact, id=contact_id)
         if (self.request.user.role != "ADMIN" and not
-            self.request.user.is_superuser and
+        self.request.user.is_superuser and
                 self.request.user != self.object.created_by):
             raise PermissionDenied
         else:
@@ -419,10 +419,10 @@ class AddCommentView(LoginRequiredMixin, CreateView):
         self.contact = get_object_or_404(
             Contact, id=request.POST.get('contactid'))
         if (
-            request.user in self.contact.assigned_to.all() or
-            request.user == self.contact.created_by or
-            request.user.is_superuser or
-            request.user.role == 'ADMIN'
+                request.user in self.contact.assigned_to.all() or
+                request.user == self.contact.created_by or
+                request.user.is_superuser or
+                request.user.role == 'ADMIN'
         ):
             form = self.get_form()
             if form.is_valid():
@@ -441,7 +441,7 @@ class AddCommentView(LoginRequiredMixin, CreateView):
         comment_id = comment.id
         current_site = get_current_site(self.request)
         send_email_user_mentions.delay(comment_id, 'contacts', domain=current_site.domain,
-            protocol=self.request.scheme)
+                                       protocol=self.request.scheme)
         return JsonResponse({
             "comment_id": comment.id, "comment": comment.comment,
             "commented_on": comment.commented_on,
@@ -475,7 +475,7 @@ class UpdateCommentView(LoginRequiredMixin, View):
         comment_id = self.comment_obj.id
         current_site = get_current_site(self.request)
         send_email_user_mentions.delay(comment_id, 'contacts', domain=current_site.domain,
-            protocol=self.request.scheme)
+                                       protocol=self.request.scheme)
         return JsonResponse({
             "commentid": self.comment_obj.id,
             "comment": self.comment_obj.comment,
@@ -563,14 +563,14 @@ class DeleteAttachmentsView(LoginRequiredMixin, View):
         self.object = get_object_or_404(
             Attachments, id=request.POST.get("attachment_id"))
         if (
-            request.user == self.object.created_by or
-            request.user.is_superuser or
-            request.user.role == 'ADMIN'
+                request.user == self.object.created_by or
+                request.user.is_superuser or
+                request.user.role == 'ADMIN'
         ):
             self.object.delete()
             data = {"aid": request.POST.get("attachment_id")}
             return JsonResponse(data)
 
         data = {'error':
-                "You don't have permission to delete this attachment."}
+                    "You don't have permission to delete this attachment."}
         return JsonResponse(data)

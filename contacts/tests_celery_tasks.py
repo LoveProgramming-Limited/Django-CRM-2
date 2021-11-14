@@ -1,5 +1,3 @@
-from datetime import datetime, timedelta
-
 from django.test import TestCase
 from django.test.utils import override_settings
 
@@ -14,5 +12,5 @@ class TestCeleryTasks(ContactObjectsCreation, TestCase):
                        BROKER_BACKEND='memory')
     def test_celery_tasks(self):
         task = send_email_to_assigned_user.apply(
-            ([self.user.id, self.user_contacts_mp.id, ], self.contact.id,),)
+            ([self.user.id, self.user_contacts_mp.id, ], self.contact.id,), )
         self.assertEqual('SUCCESS', task.state)

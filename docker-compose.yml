@@ -3,17 +3,65 @@ version: '2.0'
 services:
   db:
     image: postgres
-    # volumes:
-    #   - /home/db:/var/lib/postgresql/data
-    env_file: 
-      - ./db.env
+    volumes:
+      - testingonlyvolume:/var/lib/postgresql/data
+    #    env_file:
+    #      - ./db.env
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=root
+      - POSTGRES_DB=postgrestestingonly
 
   web:
     build: .
     image: micropyramid/django-crm:1
-    env_file: 
+    volumes:
+      - ./:/app
+    env_file:
       - ./db.env
     ports:
       - "8001:8000"
     depends_on:
       - db
+  celery:
+
+    build:
+      context: .
+      dockerfile: Dockerfile.celery
+    image: testingonlyceleryyy
+    #    command: celery --app crm worker -l info
+    env_file:
+      - ./db.env
+    volumes:
+      - ./:/app
+    environment:
+      - DEBUG=1
+      - DJANGO_ALLOWED_HOSTS=localhost 127.0.0.1 [::1]
+      - CELERY_BROKER=redis://redis:6379/0
+      - CELERY_BACKEND=redis://redis:6379/0
+    depends_on:
+      - web
+      - redis
+  elasticsearchtestingonlyk:
+    image: elasticsearch:2.3.4
+    environment:
+      - cluster.name=docker-cluster
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+      - xpack.security.enabled=false
+    volumes:
+      - esdata:/usr/share/elasticsearch/data
+    ports:
+      - "9200:9200"
+      - "9300:9300"
+  redis:
+    image: "redis:alpine"
+  flower:
+    image: mher/flower
+    environment:
+      - CELERY_BROKER_URL=redis://redis:6379/0
+      - FLOWER_PORT=8888
+    ports:
+      - 8899:8888
+volumes:
+  testingonlyvolume:
+  esdata:

@@ -1,6 +1,6 @@
 language: python
 python:
-  - "3.5.2"
+  - "python-3.6.12.tar.bz2"
 
 services:
   - elasticsearch
@@ -15,7 +15,7 @@ addons:
 sudo: required
 
 env:
-  -DJANGO=1.11
+  -DJANGO=2.2.4
 
 before_install:
   - gem install sass

@@ -1,8 +1,7 @@
-import io
 import os
+from datetime import datetime
 
 import pdfkit
-from datetime import datetime
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.sites.shortcuts import get_current_site
@@ -11,24 +10,22 @@ from django.db.models import Q
 from django.http.response import HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render, reverse
 from django.template.loader import render_to_string
-from django.views.generic import (CreateView, DeleteView, DetailView, FormView,
-                                  TemplateView, UpdateView, View)
+from django.views.generic import (CreateView, View)
 
-from common.models import Address, Attachments, Comment, User
+from common.access_decorators_mixins import (
+    sales_access_required)
+from common.models import Attachments, Comment, User
 from common.tasks import send_email_user_mentions
 from invoices.forms import (InvoiceAddressForm, InvoiceAttachmentForm,
                             InvoiceCommentForm, InvoiceForm)
 from invoices.models import Invoice
 from invoices.tasks import send_email, send_invoice_email, send_invoice_email_cancel, create_invoice_history
-from common.access_decorators_mixins import (
-    sales_access_required, marketing_access_required, SalesAccessRequiredMixin, MarketingAccessRequiredMixin)
 from teams.models import Teams
 
 
 @login_required
 @sales_access_required
 def invoices_list(request):
-
     if request.user.role == 'ADMIN' or request.user.is_superuser:
         users = User.objects.all()
     # elif request.user.google.all():
@@ -153,7 +150,7 @@ def invoices_create(request):
             send_email.delay(invoice_obj.id, assigned_to_list, **kwargs)
             if request.POST.get('from_account'):
                 return JsonResponse({'error': False, 'success_url': reverse('accounts:view_account',
-                    args=(request.POST.get('from_account'),))})
+                                                                            args=(request.POST.get('from_account'),))})
             return JsonResponse({'error': False, 'success_url': reverse('invoices:invoices_list')})
         else:
             return JsonResponse({'error': True, 'errors': form.errors,
@@ -174,10 +171,10 @@ def invoice_details(request, invoice_id):
         user_assigned_account = True
 
     if not ((request.user.role == 'ADMIN') or
-        (request.user.is_superuser) or
-        (invoice.created_by == request.user) or
-        (request.user in invoice.assigned_to.all()) or
-        user_assigned_account):
+            (request.user.is_superuser) or
+            (invoice.created_by == request.user) or
+            (request.user in invoice.assigned_to.all()) or
+            user_assigned_account):
         raise PermissionDenied
 
     if request.method == 'GET':
@@ -203,7 +200,8 @@ def invoice_details(request, invoice_id):
 def invoice_edit(request, invoice_id):
     invoice_obj = get_object_or_404(Invoice, pk=invoice_id)
 
-    if not (request.user.role == 'ADMIN' or request.user.is_superuser or invoice_obj.created_by == request.user or request.user in invoice_obj.assigned_to.all()):
+    if not (
+            request.user.role == 'ADMIN' or request.user.is_superuser or invoice_obj.created_by == request.user or request.user in invoice_obj.assigned_to.all()):
         raise PermissionDenied
 
     if request.method == 'GET':
@@ -268,7 +266,7 @@ def invoice_edit(request, invoice_id):
             send_email.delay(invoice_obj.id, recipients, **kwargs)
             if request.POST.get('from_account'):
                 return JsonResponse({'error': False, 'success_url': reverse('accounts:view_account',
-                    args=(request.POST.get('from_account'),))})
+                                                                            args=(request.POST.get('from_account'),))})
             return JsonResponse({'error': False, 'success_url': reverse('invoices:invoices_list')})
         else:
             return JsonResponse({'error': True, 'errors': form.errors,
@@ -318,6 +316,7 @@ def invoice_change_status_paid(request, invoice_id):
         # send_invoice_email.delay(invoice_id, **kwargs)
         return redirect('invoices:invoices_list')
 
+
 @login_required
 @sales_access_required
 def invoice_change_status_cancelled(request, invoice_id):
@@ -331,12 +330,14 @@ def invoice_change_status_cancelled(request, invoice_id):
         send_invoice_email_cancel.delay(invoice_id, **kwargs)
         return redirect('invoices:invoices_list')
 
+
 @login_required
 @sales_access_required
 def invoice_download(request, invoice_id):
     invoice = get_object_or_404(Invoice.objects.select_related(
         'from_address', 'to_address'), pk=invoice_id)
-    if not (request.user.role == 'ADMIN' or request.user.is_superuser or invoice.created_by == request.user or request.user in invoice.assigned_to.all()):
+    if not (
+            request.user.role == 'ADMIN' or request.user.is_superuser or invoice.created_by == request.user or request.user in invoice.assigned_to.all()):
         raise PermissionDenied
 
     if request.method == 'GET':
@@ -362,8 +363,8 @@ class AddCommentView(LoginRequiredMixin, CreateView):
         self.invoice = get_object_or_404(
             Invoice, id=request.POST.get('invoice_id'))
         if (
-            request.user == self.invoice.created_by or request.user.is_superuser or
-            request.user.role == 'ADMIN'
+                request.user == self.invoice.created_by or request.user.is_superuser or
+                request.user.role == 'ADMIN'
         ):
             form = self.get_form()
             if form.is_valid():
@@ -450,9 +451,9 @@ class AddAttachmentView(LoginRequiredMixin, CreateView):
         self.invoice = get_object_or_404(
             Invoice, id=request.POST.get('invoice_id'))
         if (
-            request.user == self.invoice.created_by or
-            request.user.is_superuser or
-            request.user.role == 'ADMIN'
+                request.user == self.invoice.created_by or
+                request.user.is_superuser or
+                request.user.role == 'ADMIN'
         ):
             form = self.get_form()
             if form.is_valid():
@@ -494,9 +495,9 @@ class DeleteAttachmentsView(LoginRequiredMixin, View):
         self.object = get_object_or_404(
             Attachments, id=request.POST.get("attachment_id"))
         if (
-            request.user == self.object.created_by or
-            request.user.is_superuser or
-            request.user.role == 'ADMIN'
+                request.user == self.object.created_by or
+                request.user.is_superuser or
+                request.user.role == 'ADMIN'
         ):
             self.object.delete()
             data = {"acd": request.POST.get("attachment_id")}

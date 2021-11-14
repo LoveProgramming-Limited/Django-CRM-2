@@ -1,14 +1,15 @@
 import re
+
 from django import forms
 from django.contrib.auth import authenticate
-from django.contrib.auth.forms import PasswordResetForm
-from common.models import Address, User, Document, Comment, APISettings
 from django.contrib.auth import password_validation
+from django.contrib.auth.forms import PasswordResetForm
+
+from common.models import Address, User, Document, Comment, APISettings
 from teams.models import Teams
 
 
 class BillingAddressForm(forms.ModelForm):
-
     class Meta:
         model = Address
         fields = ('address_line', 'street', 'city',
@@ -31,7 +32,7 @@ class BillingAddressForm(forms.ModelForm):
         self.fields['postcode'].widget.attrs.update({
             'placeholder': 'Postcode'})
         self.fields["country"].choices = [
-            ("", "--Country--"), ] + list(self.fields["country"].choices)[1:]
+                                             ("", "--Country--"), ] + list(self.fields["country"].choices)[1:]
 
         if account_view:
             self.fields['address_line'].required = True
@@ -63,12 +64,12 @@ class ShippingAddressForm(forms.ModelForm):
         self.fields['postcode'].widget.attrs.update({
             'placeholder': 'Postcode'})
         self.fields["country"].choices = [
-            ("", "--Country--"), ] + list(self.fields["country"].choices)[1:]
+                                             ("", "--Country--"), ] + list(self.fields["country"].choices)[1:]
 
 
 class UserForm(forms.ModelForm):
-
     password = forms.CharField(max_length=100, required=False)
+
     # sales = forms.BooleanField(required=False)
     # marketing = forms.BooleanField(required=False)
 
@@ -94,8 +95,8 @@ class UserForm(forms.ModelForm):
     #     self.fields['username'].required = True
     #     self.fields['email'].required = True
     #
-        # if not self.instance.pk:
-        #     self.fields['password'].required = True
+    # if not self.instance.pk:
+    #     self.fields['password'].required = True
 
     def clean_password(self):
         password = self.cleaned_data.get('password')
@@ -234,7 +235,8 @@ class DocumentForm(forms.ModelForm):
         if users:
             self.fields['shared_to'].queryset = users
         self.fields['shared_to'].required = False
-        self.fields["teams"].choices = [(team.get('id'), team.get('name')) for team in Teams.objects.all().values('id', 'name')]
+        self.fields["teams"].choices = [(team.get('id'), team.get('name')) for team in
+                                        Teams.objects.all().values('id', 'name')]
         self.fields["teams"].required = False
 
     class Meta:

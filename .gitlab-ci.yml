@@ -1,5 +1,5 @@
 Python 3.5.2:
-    script:
+  script:
     - export PY_EXE=python3.5.2
     - virtualenv -p python3 env
     - source env/bin/activate
@@ -7,7 +7,7 @@ Python 3.5.2:
     - python manage.py test --keepdb --parallel --noinput
     - coverage run --source=accounts,cases,common,contacts,leads,opportunity,tasks,invoices,events,teams,marketing manage.py test --keepdb --noinput
     - coverage report -m
-    except:
+  except:
     - tags
 
 deploy_mp:

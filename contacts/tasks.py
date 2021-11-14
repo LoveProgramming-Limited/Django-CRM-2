@@ -23,7 +23,7 @@ def send_email_to_assigned_user(recipients, contact_id, domain='demo.django-crm.
                 recipients_list.append(user.email)
                 context = {}
                 context["url"] = protocol + '://' + domain + \
-                    reverse('contacts:view_contact', args=(contact.id,))
+                                 reverse('contacts:view_contact', args=(contact.id,))
                 context["user"] = user
                 context["contact"] = contact
                 context["created_by"] = created_by

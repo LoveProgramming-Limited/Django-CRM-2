@@ -4,7 +4,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ('teams', '0003_auto_20190909_1621'),
         ('contacts', '0003_merge_20190214_1427'),

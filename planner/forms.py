@@ -1,4 +1,5 @@
 from django import forms
+
 from planner.models import Reminder
 
 
@@ -76,7 +77,6 @@ class ReminderForm(forms.ModelForm):
                                                ),
                                       widget=forms.Select(attrs={
                                           'class': 'form-control input-sm'}))
-
 
 # class MeetingEventForm(EventForm):
 #     class Meta(EventForm.Meta):

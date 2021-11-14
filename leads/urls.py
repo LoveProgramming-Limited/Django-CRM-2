@@ -1,4 +1,5 @@
 from django.urls import path
+
 from leads.views import (
     LeadListView, create_lead, LeadDetailView,
     update_lead, DeleteLeadView, convert_lead,
@@ -7,9 +8,7 @@ from leads.views import (
     update_lead_tags, remove_lead_tag, upload_lead_csv_file, sample_lead_file
 )
 
-
 app_name = 'leads'
-
 
 urlpatterns = [
     path('', LeadListView.as_view(), name='list'),

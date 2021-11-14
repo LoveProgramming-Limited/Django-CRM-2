@@ -4,9 +4,9 @@ from django.utils.translation import pgettext_lazy
 from django.utils.translation import ugettext_lazy as _
 
 from accounts.models import Account, Tags
-from contacts.models import Contact
 from common.models import User
 from common.utils import STAGES, SOURCES, CURRENCY_CODES
+from contacts.models import Contact
 from teams.models import Teams
 
 

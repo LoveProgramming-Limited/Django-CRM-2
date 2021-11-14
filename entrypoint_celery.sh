@@ -1,0 +1,1 @@
+celery -A crm worker -l info

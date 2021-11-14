@@ -1,6 +1,7 @@
 from django import forms
-from teams.models import Teams
+
 from common.models import User
+from teams.models import Teams
 
 
 class TeamForm(forms.ModelForm):

@@ -7,12 +7,10 @@ from django.core.mail import EmailMessage
 from django.shortcuts import reverse
 from django.template import Context, Template
 from django.template.loader import render_to_string
-from django.utils import timezone
 
 from accounts.models import Account, Email, EmailLog
 from common.models import User
 from common.utils import convert_to_custom_timezone
-from contacts.models import Contact
 from marketing.models import BlockedDomain, BlockedEmail
 
 
@@ -26,7 +24,8 @@ def send_email(email_obj_id):
         contacts = email_obj.recipients.all()
         for contact_obj in contacts:
             if not EmailLog.objects.filter(email=email_obj, contact=contact_obj, is_sent=True).exists():
-                if (contact_obj.email not in blocked_emails) and (contact_obj.email.split('@')[-1] not in blocked_domains):
+                if (contact_obj.email not in blocked_emails) and (
+                        contact_obj.email.split('@')[-1] not in blocked_domains):
                     html = email_obj.message_body
                     context_data = {
                         'email': contact_obj.email if contact_obj.email else '',
@@ -52,7 +51,6 @@ def send_email(email_obj_id):
                         pass
 
 
-
 @task
 def send_email_to_assigned_user(recipients, from_email, domain='demo.django-crm.io', protocol='http'):
     """ Send Mail To Users When they are assigned to a contact """
@@ -70,7 +68,7 @@ def send_email_to_assigned_user(recipients, from_email, domain='demo.django-crm.
                 recipients_list.append(user.email)
                 context = {}
                 context["url"] = protocol + '://' + domain + \
-                    reverse('accounts:view_account', args=(account.id,))
+                                 reverse('accounts:view_account', args=(account.id,))
                 context["user"] = user
                 context["account"] = account
                 context["created_by"] = created_by
@@ -109,8 +107,8 @@ def send_scheduled_emails():
         # ):
         #     send_email.delay(each.id)
         if (
-            str(each.scheduled_date_time.date()) == str(sent_time.date()) and
-            str(scheduled_date_time.hour) == str(sent_time.hour) and
-            str(scheduled_date_time.minute) == str(sent_time.minute)
+                str(each.scheduled_date_time.date()) == str(sent_time.date()) and
+                str(scheduled_date_time.hour) == str(sent_time.hour) and
+                str(scheduled_date_time.minute) == str(sent_time.minute)
         ):
             send_email.delay(each.id)

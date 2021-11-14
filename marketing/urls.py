@@ -1,6 +1,7 @@
 from django.urls import path, include
+
 from .views import (
-    dashboard, contact_lists, contacts_list, contact_list_new, contact_list_detail, edit_contact,
+    dashboard, contact_lists, contact_list_new, contact_list_detail, edit_contact,
     email_template_list, email_template_new, email_template_edit, email_template_delete,
     email_template_detail, campaign_list, campaign_new, campaign_details, campaign_delete,
     edit_contact_list, failed_contact_list_download_delete,
@@ -54,10 +55,13 @@ urlpatterns = [
     path('cm/link/<int:link_id>/e/<int:email_id>/', campaign_link_click, name='campaign_link_click'),
     path('cm/track-email/<int:campaign_log_id>/contact/<int:email_id>/', campaign_open, name='campaign_open'),
     path('demo-file-download-for-contacts-list/', demo_file_download, name='demo_file_download'),
-    path('unsubscribe-from-campaign/<int:contact_id>/<int:campaign_id>/', unsubscribe_from_campaign, name="unsubscribe_from_campaign"),
+    path('unsubscribe-from-campaign/<int:contact_id>/<int:campaign_id>/', unsubscribe_from_campaign,
+         name="unsubscribe_from_campaign"),
     path('contacts/<int:contact_id>/view/', contact_detail, name="contact_detail"),
-    path('download-contacts-for-campaign/<int:compaign_id>/', download_contacts_for_campaign, name="download_contacts_for_campaign"),
-    path('create-campaign-from-template/<int:template_id>/', create_campaign_from_template, name="create_campaign_from_template"),
+    path('download-contacts-for-campaign/<int:compaign_id>/', download_contacts_for_campaign,
+         name="download_contacts_for_campaign"),
+    path('create-campaign-from-template/<int:template_id>/', create_campaign_from_template,
+         name="create_campaign_from_template"),
     path('download-links-clicked/<int:campaign_id>/', download_links_clicked, name="download_links_clicked"),
     path('delete_multiple_contacts/', delete_multiple_contacts, name="delete_multiple_contacts"),
     path('download-failed-contacts/<int:contact_list_id>/', download_failed_contacts, name="download_failed_contacts"),

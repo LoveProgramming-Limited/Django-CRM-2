@@ -1,12 +1,12 @@
 import arrow
 from django.db import models
+from django.utils.text import slugify
 from django.utils.translation import pgettext_lazy
 from django.utils.translation import ugettext_lazy as _
+from phonenumber_field.modelfields import PhoneNumberField
 
 from common.models import User
 from common.utils import INDCHOICES, COUNTRIES
-from phonenumber_field.modelfields import PhoneNumberField
-from django.utils.text import slugify
 from contacts.models import Contact
 from teams.models import Teams
 
@@ -21,7 +21,6 @@ class Tags(models.Model):
 
 
 class Account(models.Model):
-
     ACCOUNT_STATUS_CHOICE = (
         ("open", "Open"),
         ('close', 'Close')
@@ -132,10 +131,8 @@ class Email(models.Model):
     from_email = models.EmailField()
     rendered_message_body = models.TextField(null=True)
 
-
     def __str__(self):
         return self.message_subject
-
 
 
 class EmailLog(models.Model):

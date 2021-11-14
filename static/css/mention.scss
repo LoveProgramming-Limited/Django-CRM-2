@@ -5,7 +5,9 @@
   height: 100%;
 }
 
-.mention-wrapper textarea { color: rgba(0, 0, 0, 0.1); }
+.mention-wrapper textarea {
+  color: rgba(0, 0, 0, 0.1);
+}
 
 .mention-display {
   color: rgba(0, 0, 0, 0.9);
@@ -67,4 +69,6 @@
   cursor: pointer;
 }
 
-.mention-options .mention-option.show { display: block; }
+.mention-options .mention-option.show {
+  display: block;
+}

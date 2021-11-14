@@ -7,15 +7,12 @@ from django.core.exceptions import PermissionDenied
 from django.db.models import Q
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render, reverse
-from django.views.generic import (CreateView, DeleteView, DetailView, FormView,
-    TemplateView, UpdateView, View)
+from django.views.generic import (CreateView, View)
 
 from accounts.models import Account
-from common.access_decorators_mixins import (MarketingAccessRequiredMixin,
-    SalesAccessRequiredMixin, marketing_access_required, sales_access_required)
+from common.access_decorators_mixins import (sales_access_required)
 from common.models import Attachments, Comment, User
 from common.tasks import send_email_user_mentions
-from contacts.models import Contact
 from tasks.celery_tasks import send_email
 from tasks.forms import TaskAttachmentForm, TaskCommentForm, TaskForm
 from tasks.models import Task
@@ -34,7 +31,9 @@ def tasks_list(request):
             tasks = Task.objects.filter(
                 Q(created_by=request.user) | Q(assigned_to=request.user)).distinct()
         today = datetime.today().date()
-        return render(request, 'tasks_tasks_list.html', {'tasks': tasks, 'today': today, 'status_choices': STATUS_CHOICES, 'priority_choices': PRIORITY_CHOICES})
+        return render(request, 'tasks_tasks_list.html',
+                      {'tasks': tasks, 'today': today, 'status_choices': STATUS_CHOICES,
+                       'priority_choices': PRIORITY_CHOICES})
 
     if request.method == 'POST':
         tasks = Task.objects.filter()
@@ -56,7 +55,9 @@ def tasks_list(request):
         tasks = tasks.distinct()
 
         today = datetime.today().date()
-        return render(request, 'tasks_tasks_list.html', {'tasks': tasks, 'today': today, 'status_choices': STATUS_CHOICES, 'priority_choices': PRIORITY_CHOICES})
+        return render(request, 'tasks_tasks_list.html',
+                      {'tasks': tasks, 'today': today, 'status_choices': STATUS_CHOICES,
+                       'priority_choices': PRIORITY_CHOICES})
 
 
 @login_required
@@ -71,11 +72,12 @@ def task_create(request):
         #     accounts = Account.objects.filter(created_by=request.user).filter(status="open")
         else:
             users = User.objects.filter(role='ADMIN').order_by('email')
-            accounts = Account.objects.filter(Q(created_by=request.user) | Q(assigned_to__in=[request.user])).filter(status="open")
+            accounts = Account.objects.filter(Q(created_by=request.user) | Q(assigned_to__in=[request.user])).filter(
+                status="open")
         form = TaskForm(request_user=request.user)
-        return render(request, 'task_create.html', {'form': form, 'users': users, 'accounts':accounts, 
-            "teams": Teams.objects.all(),
-        })
+        return render(request, 'task_create.html', {'form': form, 'users': users, 'accounts': accounts,
+                                                    "teams": Teams.objects.all(),
+                                                    })
 
     if request.method == 'POST':
         form = TaskForm(request.POST, request_user=request.user)
@@ -110,7 +112,6 @@ def task_create(request):
 @login_required
 @sales_access_required
 def task_detail(request, task_id):
-
     task = get_object_or_404(Task, pk=task_id)
 
     user_assigned_account = False
@@ -165,7 +166,8 @@ def task_edit(request, task_id):
         # form = TaskForm(request_user=request.user)
         form = TaskForm(instance=task_obj, request_user=request.user)
         return render(request, 'task_create.html', {'form': form, 'task_obj': task_obj,
-            'users': users, 'accounts':accounts, "teams": Teams.objects.all(),})
+                                                    'users': users, 'accounts': accounts,
+                                                    "teams": Teams.objects.all(), })
 
     if request.method == 'POST':
         form = TaskForm(request.POST, instance=task_obj,
@@ -230,8 +232,8 @@ class AddCommentView(LoginRequiredMixin, CreateView):
         self.task = get_object_or_404(
             Task, id=request.POST.get('task_id'))
         if (
-            request.user == self.task.created_by or request.user.is_superuser or
-            request.user.role == 'ADMIN'
+                request.user == self.task.created_by or request.user.is_superuser or
+                request.user.role == 'ADMIN'
         ):
             form = self.get_form()
             if form.is_valid():
@@ -318,9 +320,9 @@ class AddAttachmentView(LoginRequiredMixin, CreateView):
         self.task = get_object_or_404(
             Task, id=request.POST.get('task_id'))
         if (
-            request.user == self.task.created_by or
-            request.user.is_superuser or
-            request.user.role == 'ADMIN'
+                request.user == self.task.created_by or
+                request.user.is_superuser or
+                request.user.role == 'ADMIN'
         ):
             form = self.get_form()
             if form.is_valid():
@@ -362,9 +364,9 @@ class DeleteAttachmentsView(LoginRequiredMixin, View):
         self.object = get_object_or_404(
             Attachments, id=request.POST.get("attachment_id"))
         if (
-            request.user == self.object.created_by or
-            request.user.is_superuser or
-            request.user.role == 'ADMIN'
+                request.user == self.object.created_by or
+                request.user.is_superuser or
+                request.user.role == 'ADMIN'
         ):
             self.object.delete()
             data = {"acd": request.POST.get("attachment_id")}

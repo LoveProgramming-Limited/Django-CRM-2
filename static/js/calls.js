@@ -86,12 +86,10 @@ $("body").on("submit", "#model-form", function (e) {
                     $(".selectedcontacts").html("");
                     $(".selectedusers").html("");
                     $("#selectedleads").html("");
-                }
-                else if (data["auth"] == "NO") {
+                } else if (data["auth"] == "NO") {
                     alert("Not Authanticated!!");
                     //login REDIRECT URL
-                }
-                else {
+                } else {
                     if (data["success"] != "Call Created") {
                         for (a in data) {
                             $("#" + a + "_error").text(data[a]);
@@ -99,8 +97,7 @@ $("body").on("submit", "#model-form", function (e) {
                         }
                     }
                 }
-            }
-            else if (status == "success") {
+            } else if (status == "success") {
                 console.log(status);
             }
         }
@@ -131,23 +128,17 @@ $("body").on("click", "#deletecall", function () {
                     }).animate({opacity: "0"}, 2000, function () {
                         $(this).remove();
                     });
-                }
-                else if (data["auth"] == "NO") {
+                } else if (data["auth"] == "NO") {
                     alert("Not Authanticated!!");
                     //login REDIRECT URL
-                }
-                else if (data["failed" == "ERROR"]) {
+                } else if (data["failed" == "ERROR"]) {
                     alert("ERROR OCCURED!!!\nTry Later.");
                 }
-            }
-
-            else if (status == "error") {
+            } else if (status == "error") {
                 console.log(jqXhr);
                 if (data["error"] == "Something Went Wrong!!!") {
                     window.location = "/";
-                }
-
-                else {
+                } else {
                     console.log(status);
                 }
             }
@@ -194,22 +185,18 @@ $("body").on("click", ".viewthis", function (e, from_edit_this) {
                         $(".glyphicon-plus").hide();
                         $(".glyphicon-trash").hide();
                     }
-                }
-                else if (data["failed"] == "ERROR") {
+                } else if (data["failed"] == "ERROR") {
                     alert(data["failed"]);
 
                     //login REDIRECT URL
-                }
-                else if (data["AUTH"] == "NO") {
+                } else if (data["AUTH"] == "NO") {
                     alert("Not Authanticated");
                     //login redirect
                 }
-            }
-            else if (status == "error") {
+            } else if (status == "error") {
                 console.log(jqXhr);
 
-            }
-            else {
+            } else {
                 console.log(status);
             }
         });
@@ -278,13 +265,11 @@ $("body").on("submit", "#update-form", function (e) {
                     $(".selectedcontacts").html("");
                     $(".selectedusers").html("");
                     $("#selectedleads").html("");
-                }
-                else if (data["auth"] == "NO") {
+                } else if (data["auth"] == "NO") {
                     alert("Not Authanticated!!");
-                    window.location="/";
+                    window.location = "/";
                     //login REDIRECT URL
-                }
-                else {
+                } else {
                     // resp = JSON.parse(data);
                     if (data["success"] != "Meeting Updated") {
                         for (a in data) {
@@ -293,16 +278,14 @@ $("body").on("submit", "#update-form", function (e) {
                         }
                     }
                 }
-            }
-            else if (status == "error") {
+            } else if (status == "error") {
                 console.log(jqXhr);
                 if (data["error"] == "Something Went Wrong!!!") {
 
                     window.location = "/";
                     console.log("Something Went Wrong!!!");
                 }
-            }
-            else {
+            } else {
                 console.log(status);
             }
         });
@@ -332,8 +315,7 @@ function getreminders() {
                     window.location = "/";
                     console.log("Something Went Wrong!!!");
                 }
-            }
-            else {
+            } else {
                 console.log(status);
             }
         });

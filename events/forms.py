@@ -1,13 +1,13 @@
 from django import forms
-from contacts.models import Contact
-from common.models import User, Attachments, Comment
 from django.db.models import Q
+
+from common.models import User, Attachments, Comment
+from contacts.models import Contact
 from events.models import Event
 from teams.models import Teams
 
 
 class EventForm(forms.ModelForm):
-
     WEEKDAYS = (('Monday', 'Monday'),
                 ('Tuesday', 'Tuesday'),
                 ('Wednesday', 'Wednesday'),
@@ -33,7 +33,8 @@ class EventForm(forms.ModelForm):
             self.fields['assigned_to'].queryset = User.objects.filter(is_active=True)
             self.fields["contacts"].queryset = Contact.objects.filter()
             self.fields['assigned_to'].required = True
-            self.fields["teams"].choices = [(team.get('id'), team.get('name')) for team in Teams.objects.all().values('id', 'name')]
+            self.fields["teams"].choices = [(team.get('id'), team.get('name')) for team in
+                                            Teams.objects.all().values('id', 'name')]
         # elif request_user.google.all():
         #     self.fields['assigned_to'].queryset = User.objects.none()
         #     self.fields["contacts"].queryset = Contact.objects.filter(

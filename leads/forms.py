@@ -1,13 +1,10 @@
 import csv
-import json
 import re
 
-import openpyxl
 from django import forms
 
 from common.models import Attachments, Comment
 from leads.models import Lead
-from phonenumber_field.formfields import PhoneNumberField
 from teams.models import Teams
 
 
@@ -31,7 +28,7 @@ class LeadForm(forms.ModelForm):
         self.fields['assigned_to'].required = False
         for key, value in self.fields.items():
             if key == 'phone':
-                value.widget.attrs['placeholder'] =\
+                value.widget.attrs['placeholder'] = \
                     'Enter phone number with country code'
             else:
                 value.widget.attrs['placeholder'] = value.label
@@ -57,8 +54,9 @@ class LeadForm(forms.ModelForm):
         self.fields['postcode'].widget.attrs.update({
             'placeholder': 'Postcode'})
         self.fields["country"].choices = [
-            ("", "--Country--"), ] + list(self.fields["country"].choices)[1:]
-        self.fields["teams"].choices = [(team.get('id'), team.get('name')) for team in Teams.objects.all().values('id', 'name')]
+                                             ("", "--Country--"), ] + list(self.fields["country"].choices)[1:]
+        self.fields["teams"].choices = [(team.get('id'), team.get('name')) for team in
+                                        Teams.objects.all().values('id', 'name')]
         self.fields["teams"].required = False
 
     class Meta:
@@ -87,7 +85,9 @@ class LeadAttachmentForm(forms.ModelForm):
         model = Attachments
         fields = ('attachment', 'lead')
 
+
 email_regex = '^[_a-zA-Z0-9-]+(\.[_a-zA-Z0-9-]+)*@[a-zA-Z0-9-]+(\.[a-zA-Z0-9-]+)*(\.[a-zA-Z]{2,4})$'
+
 
 def csv_doc_validate(document):
     temp_row = []
@@ -106,7 +106,7 @@ def csv_doc_validate(document):
             csv_headers = [header_name.lower()
                            for header_name in row if header_name]
             missing_headers = set(required_headers) - \
-                set([r.lower() for r in row])
+                              set([r.lower() for r in row])
             if missing_headers:
                 missing_headers_str = ', '.join(missing_headers)
                 message = 'Missing headers: %s' % (missing_headers_str)
@@ -136,8 +136,9 @@ def csv_doc_validate(document):
             failed_leads_csv.append(list(each.values()))
         else:
             temp_row.append(each)
-    return {"error": False, "validated_rows": temp_row, "invalid_rows": invalid_row, "headers":csv_headers,
-        "failed_leads_csv": failed_leads_csv}
+    return {"error": False, "validated_rows": temp_row, "invalid_rows": invalid_row, "headers": csv_headers,
+            "failed_leads_csv": failed_leads_csv}
+
 
 def import_document_validator(document):
     try:

@@ -1,6 +1,7 @@
 from django import forms
-from opportunity.models import Opportunity
+
 from common.models import Comment, Attachments
+from opportunity.models import Opportunity
 from teams.models import Teams
 
 
@@ -32,7 +33,8 @@ class OpportunityForm(forms.ModelForm):
 
         self.fields['probability'].widget.attrs.update({
             'placeholder': 'Probability'})
-        self.fields["teams"].choices = [(team.get('id'), team.get('name')) for team in Teams.objects.all().values('id', 'name')]
+        self.fields["teams"].choices = [(team.get('id'), team.get('name')) for team in
+                                        Teams.objects.all().values('id', 'name')]
         self.fields["teams"].required = False
 
     class Meta:

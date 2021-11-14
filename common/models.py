@@ -1,12 +1,15 @@
-import arrow
 import binascii
 import datetime
 import os
 import time
-from django.db import models
-from django.utils.translation import ugettext_lazy as _
+
+import arrow
 from django.contrib.auth.models import (AbstractBaseUser, PermissionsMixin,
                                         UserManager)
+from django.db import models
+from django.utils import timezone
+from django.utils.translation import ugettext_lazy as _
+
 from common.templatetags.common_tags import (
     is_document_file_image, is_document_file_audio,
     is_document_file_video, is_document_file_pdf,
@@ -14,8 +17,6 @@ from common.templatetags.common_tags import (
     is_document_file_sheet, is_document_file_zip
 )
 from common.utils import COUNTRIES, ROLES
-from phonenumber_field.modelfields import PhoneNumberField
-from django.utils import timezone
 
 
 def img_url(self, filename):
@@ -246,7 +247,6 @@ def document_path(self, filename):
 
 
 class Document(models.Model):
-
     DOCUMENT_STATUS_CHOICE = (
         ("active", "active"),
         ('inactive', 'inactive')
@@ -262,7 +262,6 @@ class Document(models.Model):
         choices=DOCUMENT_STATUS_CHOICE, max_length=64, default='active')
     shared_to = models.ManyToManyField(User, related_name='document_shared_to')
     teams = models.ManyToManyField('teams.Teams', related_name='document_teams')
-
 
     class Meta:
         ordering = ('-created_on',)

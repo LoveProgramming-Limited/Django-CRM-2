@@ -1,16 +1,14 @@
 import csv
 import datetime
-import json
 import re
 
 import openpyxl
 import xlrd
 from django import forms
-
-from common.models import User
-from marketing.models import (BlockedDomain, BlockedEmail, Campaign, Contact,
-                              ContactEmailCampaign, ContactList, EmailTemplate, Tag)
 from haystack.forms import SearchForm
+
+from marketing.models import (BlockedDomain, BlockedEmail, Campaign, Contact,
+                              ContactEmailCampaign, ContactList, EmailTemplate)
 
 email_regex = r"(^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$)"
 
@@ -32,7 +30,7 @@ def csv_doc_validate(document):
             csv_headers = [header_name.lower()
                            for header_name in row if header_name]
             missing_headers = set(required_headers) - \
-                set([r.lower() for r in row])
+                              set([r.lower() for r in row])
             if missing_headers:
                 missing_headers_str = ', '.join(missing_headers)
                 message = 'Missing headers: %s' % (missing_headers_str)
@@ -376,7 +374,6 @@ class ContactForm(forms.ModelForm):
 
 
 class EmailTemplateForm(forms.ModelForm):
-
     class Meta:
         model = EmailTemplate
         fields = ['title', 'subject', 'html']
@@ -484,7 +481,6 @@ class EmailCampaignForm(forms.ModelForm):
 
 
 class BlockedDomainsForm(forms.ModelForm):
-
     class Meta:
         model = BlockedDomain
         fields = ['domain', ]
@@ -498,8 +494,8 @@ class BlockedDomainsForm(forms.ModelForm):
             raise forms.ValidationError('Domain with this name already exists.')
         return domain
 
-class BlockedEmailForm(forms.ModelForm):
 
+class BlockedEmailForm(forms.ModelForm):
     class Meta:
         model = BlockedEmail
         fields = ['email', ]

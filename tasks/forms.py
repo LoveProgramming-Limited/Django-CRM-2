@@ -1,9 +1,10 @@
 from django import forms
-from tasks.models import Task
-from accounts.models import Account
-from contacts.models import Contact
-from common.models import User, Attachments, Comment
 from django.db.models import Q
+
+from accounts.models import Account
+from common.models import Attachments, Comment
+from contacts.models import Contact
+from tasks.models import Task
 from teams.models import Teams
 
 

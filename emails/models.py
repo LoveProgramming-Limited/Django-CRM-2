@@ -1,9 +1,10 @@
 from django.db import models
+
+
 # Create your models here.
 
 
 class Email(models.Model):
-
     from_email = models.EmailField(max_length=200)
     to_email = models.EmailField(max_length=200)
     subject = models.CharField(max_length=200)

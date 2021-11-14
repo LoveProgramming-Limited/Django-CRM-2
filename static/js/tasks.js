@@ -49,12 +49,10 @@ $('body').on('submit', '#model-form', function (e) {
                     $("#task-create-model").modal("hide");
                     $("#task-success-model").modal("show");
                     $("#model-form").find("input[type=text], textarea").val("");
-                }
-                else if (data["auth"] == "NO") {
+                } else if (data["auth"] == "NO") {
                     alert("Not Authanticated!!");
                     //login REDIRECT URL
-                }
-                else {
+                } else {
                     if (data["success"] != "Task Created") {
                         for (a in data) {
                             $("#" + a + "_error").text(data[a]);
@@ -62,8 +60,7 @@ $('body').on('submit', '#model-form', function (e) {
                         }
                     }
                 }
-            }
-            else if (textStatus == "error") {
+            } else if (textStatus == "error") {
                 console.log(textStatus);
             }
         });
@@ -98,24 +95,18 @@ $("body").on("click", ".removethis", function (e) {
                     }).animate({opacity: "0"}, 2000, function () {
                         $(this).remove();
                     });
-                }
-                else if (data["auth"] == "NO") {
+                } else if (data["auth"] == "NO") {
                     alert("Not Authanticated!!");
                     //login REDIRECT URL
-                }
-                else if (data["failed" == "ERROR"]) {
+                } else if (data["failed" == "ERROR"]) {
                     alert("ERROR OCCURED!!!\nTry Later.");
                 }
-            }
-
-            else if (status == "error") {
+            } else if (status == "error") {
                 console.log(jqXhr);
                 if (data["error"] == "Something Went Wrong!!!") {
                     window.location = "/";
                     console.log("Something Went Wrong!!!");
-                }
-
-                else {
+                } else {
                     console.log(status);
                 }
             }
@@ -125,7 +116,15 @@ $("body").on("click", ".viewthis", function (e) {
     e.preventDefault();
     taskID = $(this).closest("tr")[0].id;
     task = taskID.match(/\d+/)[0];
-    $("#model-form").append("<input type="hidden" name="taskID" value="" + task + "">");
+    $("#model-form").append("<input type="
+    hidden
+    " name="
+    taskID
+    " value="
+    " + task + "
+    ">"
+)
+    ;
     $("#gocreatetask").attr("id", "edittask").text("Edit");
     $.post(
         "/planner/get/task/",
@@ -146,32 +145,69 @@ $("body").on("click", ".viewthis", function (e) {
                     $("#parent_type").val(data["parent_type"]);
                     ///////////////////ASSGNED USERS////////////////////////////////////////////
                     $("#selected-assignee-users").html("");
-                    $("#assigned_user_error").before("<div id="selected-assignee-users"></div>");
+                    $("#assigned_user_error").before("<div id="
+                    selected - assignee - users
+                    "></div>"
+                )
+                    ;
                     for (a in data["assigned_users"]) {
                         if ($.isNumeric(a)) {
-                            strr = "<input id="assigned_user" type="hidden" name="assigned_users" value="" + a + ""/>";
+                            strr = "<input id="
+                            assigned_user
+                            " type="
+                            hidden
+                            " name="
+                            assigned_users
+                            " value="
+                            " + a + "
+                            "/>";
                             // $("#user_name").after(str)
-                            str = "<div class="input-group"><input placeholder="Assign user" readonly value="" + data["assigned_users"][a] + "" class="main-element form-control input-sm" type="text"><span class="input-group-btn"><button tabindex="-1" type="button" class="btn btn-default input-sm clearthis-assigned-user"><i class="glyphicon glyphicon-remove"></i></button></span>" + strr + "</div>";
+                            str = "<div class="
+                            input - group
+                            "><input placeholder="
+                            Assign
+                            user
+                            " readonly value="
+                            " + data["
+                            assigned_users
+                            "][a] + "
+                            " class="
+                            main - element
+                            form - control
+                            input - sm
+                            " type="
+                            text
+                            "><span class="
+                            input - group - btn
+                            "><button tabindex=" - 1
+                            " type="
+                            button
+                            " class="
+                            btn
+                            btn -
+                        default
+                            input - sm
+                            clearthis - assigned - user
+                            "><i class="
+                            glyphicon
+                            glyphicon - remove
+                            "></i></button></span>" + strr + "</div>";
                             $("#selected-assignee-users").append(str);
                         }
                     }
                     ///////////////////END  ASSGNED USERS////////////////////////////////////////////
-                }
-                else if (data["failed"] == "ERROR") {
+                } else if (data["failed"] == "ERROR") {
                     alert(data["failed"]);
 
                     //login REDIRECT URL
-                }
-                else if (data["AUTH"] == "NO") {
+                } else if (data["AUTH"] == "NO") {
                     alert("Not Authanticated");
                     //login redirect
                 }
-            }
-            else if (status == "error") {
+            } else if (status == "error") {
                 console.log(jqXhr);
 
-            }
-            else {
+            } else {
                 console.log(status);
             }
         });
@@ -186,7 +222,13 @@ $("body").on("click", "#edittask", function (e) {
     $("#model-form").attr({"id": "update-form", "type": "submit"});
     $("#edittask").attr({"id": "update", "type": "submit"}).text("Update");
     $("#modeldialogclosed").attr({"id": "modeldialogclosed"});
-    $("#modelbody").append("<input type="hidden" value="" + taskID + "">");
+    $("#modelbody").append("<input type="
+    hidden
+    " value="
+    " + taskID + "
+    ">"
+)
+    ;
 });
 $("body").on("click", "#updatemodeldialogclosed", function (e) {
     e.preventDefault();
@@ -228,13 +270,11 @@ $("body").on("submit", "#update-form", function (e) {
                     $("#update-form").attr({"id": "model-form"});
                     $("#model-form").find("input[type=text], textarea").val("");
                     $("#updatemodeldialogclosed").attr({"id": "modeldialogclosed"});
-                }
-                else if (data["auth"] == "NO") {
+                } else if (data["auth"] == "NO") {
                     alert("Not Authanticated!!");
 
                     //login REDIRECT URL
-                }
-                else {
+                } else {
 
                     if (data["success"] != "Task Updated") {
                         for (a in data) {
@@ -243,16 +283,14 @@ $("body").on("submit", "#update-form", function (e) {
                         }
                     }
                 }
-            }
-            else if (status == "error") {
+            } else if (status == "error") {
                 console.log(jqXhr);
                 if (data["error"] == "Something Went Wrong!!!") {
 
                     window.location = "/";
                     console.log("Something Went Wrong!!!");
                 }
-            }
-            else {
+            } else {
                 console.log(status);
             }
         });

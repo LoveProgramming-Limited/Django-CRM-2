@@ -1,13 +1,11 @@
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import Client, TestCase
-from django.urls import reverse
 from django.utils.encoding import force_text
 
 from accounts.models import Account, Tags
 from cases.models import Case
-from common.models import APISettings, Attachments, Comment, User
+from common.models import APISettings
 from leads.forms import *
-from leads.models import Lead
 from leads.tasks import *
 from teams.models import Teams
 
@@ -165,23 +163,23 @@ class LeadsCreateUrlTestCase(TestLeadModel, TestCase):
 
     def test_leads_create_url(self):
         response = self.client.post('/leads/create/', {
-                                    'title': 'LeadCreation',
-                                    'first_name': "john doe",
-                                    'email': "johnDoeLeadCreation@example.com",
-                                    'account': self.account,
-                                    'address_line': "",
-                                    'street': "street",
-                                    'city': "new town",
-                                    'state': "state",
-                                    'postcode': "1234",
-                                    'country': "IN",
-                                    'website': "www.example.com",
-                                    "status": "assigned",
-                                    "source": "call",
-                                    'opportunity_amount': "700",
-                                    'description': "Lead object creaton description",
-                                    'created_by': self.user,
-                                    'tags': 'tag1, tag4, tag5'})
+            'title': 'LeadCreation',
+            'first_name': "john doe",
+            'email': "johnDoeLeadCreation@example.com",
+            'account': self.account,
+            'address_line': "",
+            'street': "street",
+            'city': "new town",
+            'state': "state",
+            'postcode': "1234",
+            'country': "IN",
+            'website': "www.example.com",
+            "status": "assigned",
+            "source": "call",
+            'opportunity_amount': "700",
+            'description': "Lead object creaton description",
+            'created_by': self.user,
+            'tags': 'tag1, tag4, tag5'})
         self.assertEqual(response.status_code, 200)
 
     def test_leads_create_html(self):
@@ -266,6 +264,7 @@ class LeadsRemoveTestCase(TestLeadModel, TestCase):
         response = self.client.get(reverse('leads:remove_lead', args=(self.lead.id,)))
         self.assertEqual(response.status_code, 302)
 
+
 class UpdateLeadTestCase(TestLeadModel, TestCase):
 
     def test_update_lead(self):
@@ -300,7 +299,6 @@ class CommentTestCase(TestLeadModel, TestCase):
         response = self.client.post(
             '/leads/comment/add/', {'leadid': self.lead.id})
         self.assertEqual(response.status_code, 200)
-
 
     def test_comment_create(self):
         response = self.client.post(
@@ -362,10 +360,10 @@ class TestTemplates(TestLeadModel, TestCase):
 
     def test_lead_list_view(self):
         resp = self.client.post(reverse('leads:list'), {'name': 'search filter',
-                                                 'tag': "123",
-                                                 'source': "call",
-                                                 'assigned_to': '1',
-                                                 'tab_status': 'Open'})
+                                                        'tag': "123",
+                                                        'source': "call",
+                                                        'assigned_to': '1',
+                                                        'tab_status': 'Open'})
         self.assertEqual(resp.status_code, 200)
         # print(resp.name)
         # self.assertTrue(resp.name)
@@ -483,26 +481,26 @@ class TestUpdateLeadView(TestLeadModel, TestCase):
 
     def test_lead_update_view(self):
         response = self.client.post(reverse('leads:edit_lead', args=(self.lead.id,)),
-                        {'status': 'converted', 'country':'AD', 'title':'update_title'})
+                                    {'status': 'converted', 'country': 'AD', 'title': 'update_title'})
         self.assertEqual(response.status_code, 200)
 
         response = self.client.post(reverse('leads:edit_lead', args=(self.lead.id,)),
-                        {'status': 'assigned', 'country':'AD', 'title':'update_title'})
+                                    {'status': 'assigned', 'country': 'AD', 'title': 'update_title'})
         self.assertEqual(response.status_code, 200)
 
         response = self.client.post(reverse('leads:edit_lead', args=(self.lead.id,)),
-                        {'status': 'assigned', 'country':'AD', 'title':'update_title',
-                        'tags':'tag3, tag4'})
+                                    {'status': 'assigned', 'country': 'AD', 'title': 'update_title',
+                                     'tags': 'tag3, tag4'})
         self.assertEqual(response.status_code, 200)
 
         response = self.client.post(reverse('leads:edit_lead', args=(self.lead.id,)),
-                        {'status': 'assigned', 'country':'AD', 'title':'update_title',
-                        'assigned_to':str(self.user.id)})
+                                    {'status': 'assigned', 'country': 'AD', 'title': 'update_title',
+                                     'assigned_to': str(self.user.id)})
         self.assertEqual(response.status_code, 200)
 
         self.client.login(username='janeLead2@example.com', password='password')
         response = self.client.get(reverse('leads:edit_lead', args=(self.lead.id,)),
-                        {'status': 'assigned', 'country':'AD', 'title':'update_title'})
+                                   {'status': 'assigned', 'country': 'AD', 'title': 'update_title'})
         self.assertEqual(response.status_code, 403)
         self.client.logout()
 
@@ -540,7 +538,6 @@ class TestCommentAddResponse(TestLeadModel, TestCase):
         response = self.client.post(
             '/leads/attachment/add/', {'leadid': self.lead1.id})
         self.assertJSONEqual(force_text(response.content), {"error": ["This field is required."]})
-
 
     def test_file_upload_for_leads(self):
         self.client.logout()
@@ -616,8 +613,9 @@ class TestCommentAddResponse(TestLeadModel, TestCase):
 
         self.teams_leads = Teams.objects.create(name='teams leads')
         self.teams_leads.users.add(self.user1)
-        response = self.client.post(reverse('leads:add_lead'), {'title': 'new lead title', 'teams': [self.teams_leads.id, ],
-            'savenewform':'true'})
+        response = self.client.post(reverse('leads:add_lead'),
+                                    {'title': 'new lead title', 'teams': [self.teams_leads.id, ],
+                                     'savenewform': 'true'})
         self.assertEqual(response.status_code, 200)
         response = self.client.post(reverse('leads:add_lead'), {'title': ''})
         self.assertEqual(response.status_code, 200)
@@ -652,9 +650,9 @@ class TestCommentAddResponse(TestLeadModel, TestCase):
         data = {
             'title': self.lead_1.title,
             'teams': [self.teams_leads.id, ],
-            'status':'converted',
+            'status': 'converted',
             'account_name': 'lead_conversion',
-            'email':'account@lead.com'
+            'email': 'account@lead.com'
         }
         comment = Comment.objects.create(comment='comment text lead', lead=self.lead_1, commented_by=self.user)
         response = self.client.post(reverse('leads:edit_lead', args=(self.lead_1.id,)) + '?status=converted', data)
@@ -675,7 +673,7 @@ class TestCommentAddResponse(TestLeadModel, TestCase):
 
         self.tag_for_lead = Tags.objects.create(name='tag for lead')
         data = {
-            'tags':'tag1 lead,tag2 lead,tag for lead'
+            'tags': 'tag1 lead,tag2 lead,tag for lead'
         }
         response = self.client.post(reverse('leads:update_lead_tags', args=(self.lead.id,)), data)
         self.assertEqual(response.status_code, 302)
@@ -701,11 +699,11 @@ class TestCommentAddResponse(TestLeadModel, TestCase):
 
         response = self.client.get(reverse('leads:sample_lead_file'))
         sample_data = [
-        'title,first name,last name,website,phone,email,address\n',
-        'lead1,john,doe,www.example.com,+91-123-456-7890,user1@email.com,address for lead1\n',
-        'lead2,jane,doe,www.website.com,+91-123-456-7891,user2@email.com,address for lead2\n',
-        'lead3,joe,doe,www.test.com,+91-123-456-7892,user3@email.com,address for lead3\n',
-        'lead4,john,doe,www.sample.com,+91-123-456-7893,user4@email.com,address for lead4\n',
+            'title,first name,last name,website,phone,email,address\n',
+            'lead1,john,doe,www.example.com,+91-123-456-7890,user1@email.com,address for lead1\n',
+            'lead2,jane,doe,www.website.com,+91-123-456-7891,user2@email.com,address for lead2\n',
+            'lead3,joe,doe,www.test.com,+91-123-456-7892,user3@email.com,address for lead3\n',
+            'lead4,john,doe,www.sample.com,+91-123-456-7893,user4@email.com,address for lead4\n',
         ]
         content = bytes(''.join(sample_data), 'utf-8')
         self.assertEqual(response.content, content)

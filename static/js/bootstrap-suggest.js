@@ -21,7 +21,7 @@
 
     "use strict"; // jshint ;_;
 
-    var Suggest = function(el, key, options) {
+    var Suggest = function (el, key, options) {
         var that = this;
 
         this.$element = $(el);
@@ -44,17 +44,17 @@
     };
 
     Suggest.prototype = {
-        __setListener: function() {
+        __setListener: function () {
             this.$element
-            .on('suggest.show', $.proxy(this.options.onshow, this))
-            .on('suggest.select', $.proxy(this.options.onselect, this))
-            .on('suggest.lookup', $.proxy(this.options.onlookup, this))
-            .on('keyup', $.proxy(this.__keyup, this));
+                .on('suggest.show', $.proxy(this.options.onshow, this))
+                .on('suggest.select', $.proxy(this.options.onselect, this))
+                .on('suggest.lookup', $.proxy(this.options.onlookup, this))
+                .on('keyup', $.proxy(this.__keyup, this));
 
             return this;
         },
 
-        __getCaretPos: function(posStart) {
+        __getCaretPos: function (posStart) {
             // https://github.com/component/textarea-caret-position/blob/master/index.js
 
             // The properties that we copy into a mirrored div.
@@ -107,12 +107,12 @@
                 document.body.appendChild(div);
 
                 var style = div.style;
-                var computed = window.getComputedStyle? getComputedStyle(element) : element.currentStyle;  // currentStyle for IE < 9
+                var computed = window.getComputedStyle ? getComputedStyle(element) : element.currentStyle;  // currentStyle for IE < 9
 
                 // default textarea styles
                 style.whiteSpace = 'pre-wrap';
                 if (element.nodeName !== 'INPUT')
-                style.wordWrap = 'break-word';  // only for textarea-s
+                    style.wordWrap = 'break-word';  // only for textarea-s
 
                 // position off-screen
                 style.position = 'absolute';  // required to return coordinates properly
@@ -127,7 +127,7 @@
                     style.width = parseInt(computed.width) - 2 + 'px';  // Firefox adds 2 pixels to the padding - https://bugzilla.mozilla.org/show_bug.cgi?id=753662
                     // Firefox lies about the overflow property for textareas: https://bugzilla.mozilla.org/show_bug.cgi?id=984275
                     if (element.scrollHeight > parseInt(computed.height))
-                    style.overflowY = 'scroll';
+                        style.overflowY = 'scroll';
                 } else {
                     style.overflow = 'hidden';  // for Chrome to not render a scrollbar; IE keeps overflowY = 'scroll'
                 }
@@ -135,7 +135,7 @@
                 div.textContent = element.value.substring(0, position);
                 // the second special handling for input type="text" vs textarea: spaces need to be replaced with non-breaking spaces - http://stackoverflow.com/a/13402035/1269037
                 if (element.nodeName === 'INPUT')
-                div.textContent = div.textContent.replace(/\s/g, "\u00a0");
+                    div.textContent = div.textContent.replace(/\s/g, "\u00a0");
 
                 var span = document.createElement('span');
                 // Wrapping must be replicated *exactly*, including when a long word gets
@@ -159,7 +159,7 @@
             return getCaretCoordinatesFn(this.$element.get(0), posStart);
         },
 
-        __keyup: function(e) {
+        __keyup: function (e) {
             // don't query special characters
             // http://mikemurko.com/general/jquery-keycode-cheatsheet/
             var specialChars = [38, 40, 37, 39, 17, 18, 9, 16, 20, 91, 93, 36, 35, 45, 33, 34, 144, 112, 113, 114, 115, 116, 117, 118, 119, 120, 121, 122, 123, 145, 19];
@@ -179,13 +179,13 @@
                 currentPos = this.__getSelection($el.get(0)).start;
 
             for (var i = currentPos; i >= 0; i--) {
-                var subChar = $.trim(val.substring(i-1, i));
+                var subChar = $.trim(val.substring(i - 1, i));
                 if (!subChar) {
                     this.hide();
                     break;
                 }
 
-                if (subChar === this.key && $.trim(val.substring(i-2, i-1)) == '') {
+                if (subChar === this.key && $.trim(val.substring(i - 2, i - 1)) == '') {
                     this.query = val.substring(i, currentPos);
                     this._queryPos = [i, currentPos];
                     this._keyPos = i;
@@ -195,38 +195,38 @@
             }
         },
 
-        __getVisibleItems: function() {
+        __getVisibleItems: function () {
             return this.$items ? this.$items.not('.d-none') : $();
         },
 
-        __build: function() {
+        __build: function () {
             var elems = [], $item,
                 $dropdown = this.$dropdown,
                 that = this;
 
-            var blur = function(e) {
+            var blur = function (e) {
                 that.hide();
             }
 
-            $dropdown.on('click', 'a.dropdown-item', function(e) {
+            $dropdown.on('click', 'a.dropdown-item', function (e) {
                 e.preventDefault();
                 that.__select($(this).index());
                 that.$element.focus();
-            }).on('mouseover', 'a.dropdown-item', function(e) {
+            }).on('mouseover', 'a.dropdown-item', function (e) {
                 that.$element.off('blur', blur);
-            }).on('mouseout', 'a.dropdown-item', function(e) {
+            }).on('mouseout', 'a.dropdown-item', function (e) {
                 that.$element.on('blur', blur);
             });
 
-            this.$element.before($dropdown).on('blur', blur).on('keydown', function(e) {
+            this.$element.before($dropdown).on('blur', blur).on('keydown', function (e) {
                 var $visibleItems;
                 if (that.isShown) {
                     switch (e.keyCode) {
                         case 13: // enter key
                             $visibleItems = that.__getVisibleItems();
-                            $visibleItems.each(function(index) {
+                            $visibleItems.each(function (index) {
                                 if ($(this).is('.active'))
-                                that.__select($(this).index());
+                                    that.__select($(this).index());
                             });
 
                             return false;
@@ -234,9 +234,9 @@
                         case 40: // arrow down
                             $visibleItems = that.__getVisibleItems();
                             if ($visibleItems.last().is('.active')) return false;
-                            $visibleItems.each(function(index) {
+                            $visibleItems.each(function (index) {
                                 var $this = $(this),
-                                $next = $visibleItems.eq(index + 1);
+                                    $next = $visibleItems.eq(index + 1);
 
                                 //if (!$next.length) return false;
 
@@ -252,9 +252,9 @@
                         case 38: // arrow up
                             $visibleItems = that.__getVisibleItems();
                             if ($visibleItems.first().is('.active')) return false;
-                            $visibleItems.each(function(index) {
+                            $visibleItems.each(function (index) {
                                 var $this = $(this),
-                                $prev = $visibleItems.eq(index - 1);
+                                    $prev = $visibleItems.eq(index - 1);
 
                                 //if (!$prev.length) return false;
 
@@ -273,7 +273,7 @@
 
         },
 
-        __mapItem: function(dataItem) {
+        __mapItem: function (dataItem) {
             var itemHtml, that = this,
                 _item = {
                     text: '',
@@ -301,7 +301,7 @@
             });
         },
 
-        __select: function(index) {
+        __select: function (index) {
             var $el = this.$element,
                 el = $el.get(0),
                 val = $el.val(),
@@ -335,7 +335,7 @@
             };
         },
 
-        __buildItems: function(data) {
+        __buildItems: function (data) {
             var $dropdownMenu = this.$dropdown.find('.dropdown-menu');
 
             $dropdownMenu.empty();
@@ -351,7 +351,7 @@
             return $dropdownMenu.find('a.dropdown-item');
         },
 
-        __lookup: function(q, $resultItems) {
+        __lookup: function (q, $resultItems) {
             var active = $resultItems.eq(0).addClass('active');
             this.$element.trigger($.extend({type: 'suggest.lookup'}, this), [q, $resultItems]);
 
@@ -362,7 +362,7 @@
             }
         },
 
-        __filterData: function(q, data) {
+        __filterData: function (q, data) {
             var options = this.options;
 
             this.$items.addClass('d-none');
@@ -382,7 +382,7 @@
             return this.__getVisibleItems();
         },
 
-        get: function(index) {
+        get: function (index) {
             if (!this.$items) return;
 
             var $item = this.$items.eq(index);
@@ -394,12 +394,12 @@
             };
         },
 
-        lookup: function(q) {
+        lookup: function (q) {
             var options = this.options,
                 that = this,
                 data;
 
-            var provide = function(data) {
+            var provide = function (data) {
                 // verify that we're still "typing" the query (no space)
                 if (that._keyPos !== -1) {
                     if (!that.$items) {
@@ -424,21 +424,21 @@
             }
         },
 
-        load: function() {
+        load: function () {
             this.__setListener();
             this.__build();
         },
 
-        hide: function() {
+        hide: function () {
             this.$dropdown.find('.dropdown-menu').removeClass('show');
             this.isShown = false;
-            if(this.$items) {
+            if (this.$items) {
                 this.$items.removeClass('active');
             }
             this._keyPos = -1;
         },
 
-        show: function() {
+        show: function () {
             var $el = this.$element,
                 $dropdownMenu = this.$dropdown.find('.dropdown-menu'),
                 el = $el.get(0),
@@ -494,14 +494,14 @@
     // .suggest( key [, options] )
     // .suggest( method [, options] )
     // .suggest( suggestions )
-    $.fn.suggest = function(arg1) {
+    $.fn.suggest = function (arg1) {
         var arg2 = arguments[1],
             arg3 = arguments[2];
 
-        var createSuggestions = function(el, suggestions) {
+        var createSuggestions = function (el, suggestions) {
             var newData = {};
-            $.each(suggestions, function(keyChar, options) {
-                var key =  keyChar.toString().charAt(0);
+            $.each(suggestions, function (keyChar, options) {
+                var key = keyChar.toString().charAt(0);
 
                 // remove existing suggest
                 // $('.suggest.dropdown[data-key="'+key+'"]').remove();
@@ -511,11 +511,11 @@
             return newData;
         };
 
-        return this.each(function() {
+        return this.each(function () {
             var that = this,
-            $this = $(this),
-            data = $this.data('suggest'),
-            suggestions = {};
+                $this = $(this),
+                data = $this.data('suggest'),
+                suggestions = {};
 
             if (typeof arg1 === 'string') {
                 if (arg1.length == 1) {
@@ -550,7 +550,7 @@
                 if (!data) $this.data('suggest', createSuggestions(this, arg1));
                 else if (data) {
                     // create/update suggestions
-                    $.each(arg1, function(key, value) {
+                    $.each(arg1, function (key, value) {
                         if (key in data === false) {
                             suggestions[key] = value;
                         } else {
@@ -575,9 +575,12 @@
         dropdownClass: '',
         position: 'caret',
         // events hook
-        onshow: function(e) {},
-        onselect: function(e, item) {},
-        onlookup: function(e, item) {}
+        onshow: function (e) {
+        },
+        onselect: function (e, item) {
+        },
+        onlookup: function (e, item) {
+        }
 
     }
 
@@ -588,5 +591,5 @@
         return this;
     }
 
-}( jQuery ));
+}(jQuery));
 

@@ -1,8 +1,8 @@
 from django.urls import path
+
 from tasks.views import *
 
 app_name = 'tasks'
-
 
 urlpatterns = [
     path('', tasks_list, name='tasks_list'),

@@ -1,5 +1,4 @@
 import csv
-import json
 from datetime import datetime as ddatetime
 
 import lxml
@@ -8,30 +7,28 @@ import pytz
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied
-from django.core.paginator import EmptyPage, PageNotAnInteger, Paginator
+from django.core.paginator import Paginator
 from django.db.models import Q
 from django.http.response import (HttpResponse, HttpResponseRedirect,
                                   JsonResponse)
 from django.shortcuts import get_object_or_404, redirect, render
-from django.urls import reverse, reverse_lazy
+from django.urls import reverse
+from haystack.query import SearchQuerySet
 from lxml.cssselect import CSSSelector
 
 from common import status
-from common.utils import convert_to_custom_timezone
+from common.access_decorators_mixins import marketing_access_required, admin_login_required
 from common.models import User
+from common.utils import convert_to_custom_timezone
 from marketing.forms import (ContactForm, ContactListForm, EmailTemplateForm,
                              SendCampaignForm, EmailCampaignForm, BlockedDomainsForm,
-                             BlockedEmailForm, MarketingContactEmailSearchForm)
+                             BlockedEmailForm)
 from marketing.models import (Campaign, CampaignLinkClick, CampaignLog,
                               CampaignOpen, Contact, ContactList,
                               EmailTemplate, Link, Tag, FailedContact, ContactUnsubscribedCampaign,
                               ContactEmailCampaign, BlockedDomain, BlockedEmail)
 from marketing.tasks import (run_campaign, upload_csv_file,
-                            delete_multiple_contacts_tasks,
-                            send_campaign_email_to_admin_contact)
-from common.access_decorators_mixins import marketing_access_required, MarketingAccessRequiredMixin, admin_login_required
-from haystack.generic_views import SearchView
-from haystack.query import SearchQuerySet
+                             send_campaign_email_to_admin_contact)
 
 TIMEZONE_CHOICES = [(tz, tz) for tz in pytz.common_timezones]
 
@@ -62,7 +59,8 @@ def dashboard(request):
     # x_axis_titles = [
     #     campaign_obj.title for campaign_obj in campaign[:5]]
     x_axis_titles = [
-        campaign_obj.title[0:10] + '...' if len(campaign_obj.title) > 15 else campaign_obj.title for campaign_obj in campaign[:5]]
+        campaign_obj.title[0:10] + '...' if len(campaign_obj.title) > 15 else campaign_obj.title for campaign_obj in
+        campaign[:5]]
     y_axis_bounces = [
         campaign_obj.get_all_email_bounces_count for campaign_obj in campaign[:5]]
     y_axis_unsubscribed = [
@@ -71,7 +69,6 @@ def dashboard(request):
         campaign_obj.get_all_emails_subscribed_count for campaign_obj in campaign[:5]]
     y_axis_opened = [
         campaign_obj.get_all_emails_contacts_opened for campaign_obj in campaign[:5]]
-
 
     context = {
         'email_templates': email_templates,
@@ -156,7 +153,7 @@ def contacts_list(request):
             contacts = contacts.filter(contact_list=data.get('contact_list'))
 
         context = {'contacts': contacts, 'users': User.objects.all(),
-            'contact_lists': contact_lists}
+                   'contact_lists': contact_lists}
         return render(request, 'marketing/lists/all.html', context)
 
 
@@ -329,7 +326,8 @@ def edit_contact(request, pk):
                     form.save_m2m()
             if request.POST.get('from_url'):
                 return JsonResponse({'error': False,
-                                     'success_url': reverse('marketing:contact_list_detail', args=(request.POST.get('from_url'),))})
+                                     'success_url': reverse('marketing:contact_list_detail',
+                                                            args=(request.POST.get('from_url'),))})
             return JsonResponse({'error': False, 'success_url': reverse('marketing:contacts_list')})
         else:
             return JsonResponse({'error': True, 'errors': form.errors, })
@@ -396,12 +394,12 @@ def contact_list_detail(request, pk):
         bounced_contacts_list = paginator.page(paginator.num_pages)
 
     data = {'contact_list': contact_list, "contacts_list": contacts_list,
-        "bounced_contacts_list":bounced_contacts_list,
-        'bounced_contacts_list_count': bounced_contacts_list_count,
-        'contacts_list_count': contacts_list_count,
-        'duplicate_contacts': duplicate_contacts,
-        # these two are added for digg pagintor
-        'paginator':paginator,'page_obj': bounced_contacts_list,}
+            "bounced_contacts_list": bounced_contacts_list,
+            'bounced_contacts_list_count': bounced_contacts_list_count,
+            'contacts_list_count': contacts_list_count,
+            'duplicate_contacts': duplicate_contacts,
+            # these two are added for digg pagintor
+            'paginator': paginator, 'page_obj': bounced_contacts_list, }
     return render(request, 'marketing/lists/detail.html', data)
 
 
@@ -621,7 +619,8 @@ def campaign_new(request):
             for l in links:
                 link = Link.objects.create(campaign_id=camp.id, original=l)
                 html = html.replace(
-                    'href="' + l + '"', 'href="' + domain_url + '/marketing/cm/link/' + str(link.id) + '/e/{{email_id}}"')
+                    'href="' + l + '"',
+                    'href="' + domain_url + '/marketing/cm/link/' + str(link.id) + '/e/{{email_id}}"')
 
             camp.html_processed = html
             camp.sent_status = "scheduled"
@@ -827,7 +826,7 @@ def campaign_link_click(request, link_id, email_id):
     return redirect(url)
 
 
-def campaign_open(request, campaign_log_id, email_id): # pragma: no cover
+def campaign_open(request, campaign_log_id, email_id):  # pragma: no cover
     x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
 
     if x_forwarded_for:
@@ -940,7 +939,6 @@ def download_contacts_for_campaign(request, compaign_id):
                 'company_name', 'email', 'name', 'last_name', 'city', 'state')
 
         if request.GET.get('is_unsubscribed') == 'true':
-
             # unsubscribe_contacts_ids = ContactUnsubscribedCampaign.objects.filter(
             #     campaigns=campaign_obj, is_unsubscribed=True).values_list('contacts_id', flat=True)
             contact_ids = campaign_obj.campaign_log_contacts.filter(contact__is_unsubscribed=True).values_list(
@@ -987,7 +985,8 @@ def create_campaign_from_template(request, template_id):
 def download_links_clicked(request, campaign_id):
     campaign_obj = get_object_or_404(Campaign, pk=campaign_id)
     campaign_link_click_objects = campaign_obj.campaign_link_click.all().select_related('link', 'campaign', 'contact')
-    csv_row_headers = ['email', 'company', 'first name', 'last name', 'city', 'state', 'original link', 'unique clicks', 'total clicks', 'campaign title']
+    csv_row_headers = ['email', 'company', 'first name', 'last name', 'city', 'state', 'original link', 'unique clicks',
+                       'total clicks', 'campaign title']
     data = []
     data.append(','.join(csv_row_headers) + '\n')
     if campaign_link_click_objects:
@@ -1017,7 +1016,8 @@ def delete_multiple_contacts(request):
     cannot_be_deleted = []
     error = False
     for contact_obj in contacts_list:
-        if not (request.user.role == 'ADMIN' or request.user.is_superuser or contact_obj.created_by == request.user or (contact_obj.id in shared_contact_lists)):
+        if not (request.user.role == 'ADMIN' or request.user.is_superuser or contact_obj.created_by == request.user or (
+                contact_obj.id in shared_contact_lists)):
             cannot_be_deleted.append(contact_obj.email)
             error = True
     if len(cannot_be_deleted) == 0:
@@ -1038,21 +1038,19 @@ def delete_multiple_contacts(request):
                         contact_list_obj = get_object_or_404(ContactList, pk=request.POST.get('from_contact'))
                         contact_obj.contact_list.remove(contact_list_obj)
 
-        return JsonResponse({'error':False, 'refresh': True})
+        return JsonResponse({'error': False, 'refresh': True})
     else:
         message = "You don't have permission to delete {}".format(', '.join(cannot_be_deleted))
-        return JsonResponse({'error': True, 'message' : message })
-
+        return JsonResponse({'error': True, 'message': message})
 
 
 @login_required(login_url='/login')
 @marketing_access_required
 def delete_all_contacts(request, contact_list_id):
-
     contacts_list_obj = get_object_or_404(ContactList, pk=contact_list_id)
     if not (request.user.role == 'ADMIN' or request.user.is_superuser or contacts_list_obj.created_by == request.user):
         raise PermissionDenied
-    if request.GET.get('bounced','') == 'true':
+    if request.GET.get('bounced', '') == 'true':
         bounced = True
     else:
         bounced = False
@@ -1084,12 +1082,12 @@ def delete_all_contacts(request, contact_list_id):
 @login_required
 @marketing_access_required
 def download_failed_contacts(request, contact_list_id):
-
     contact_list_obj = get_object_or_404(ContactList, pk=contact_list_id)
     if not (request.user.role == 'ADMIN' or request.user.is_superuser or contact_list_obj.created_by == request.user):
         raise PermissionDenied
 
-    failed_contacts = contact_list_obj.failed_contacts.values('company_name', 'email', 'name', 'last_name', 'city', 'state')
+    failed_contacts = contact_list_obj.failed_contacts.values('company_name', 'email', 'name', 'last_name', 'city',
+                                                              'state')
     if failed_contacts:
         data = [
             'company name,email,first name,last name,city,state\n',
@@ -1137,9 +1135,9 @@ def add_email_for_campaigns(request):
             obj = form.save(commit=False)
             obj.created_by = request.user
             obj.save()
-            return JsonResponse({'error':False, 'success_url':reverse('common:api_settings')})
+            return JsonResponse({'error': False, 'success_url': reverse('common:api_settings')})
         else:
-            return JsonResponse({'error':True, 'errors':form.errors})
+            return JsonResponse({'error': True, 'errors': form.errors})
 
 
 @login_required
@@ -1157,9 +1155,9 @@ def edit_email_for_campaigns(request, pk):
         if form.is_valid():
             obj = form.save(commit=False)
             obj.save()
-            return JsonResponse({'error':False, 'success_url':reverse('common:api_settings')})
+            return JsonResponse({'error': False, 'success_url': reverse('common:api_settings')})
         else:
-            return JsonResponse({'error':True, 'errors':form.errors})
+            return JsonResponse({'error': True, 'errors': form.errors})
 
 
 @login_required
@@ -1170,6 +1168,7 @@ def delete_email_for_campaigns(request, pk):
     if request.method == 'GET':
         contact_obj.delete()
         return HttpResponseRedirect(reverse('common:api_settings'))
+
 
 # the below views should be in settings page
 
@@ -1185,9 +1184,10 @@ def add_blocked_domain(request):
             domain = form.save(commit=False)
             domain.created_by = request.user
             domain.save()
-            return JsonResponse({'error':False, 'success_url':reverse('common:api_settings')})
+            return JsonResponse({'error': False, 'success_url': reverse('common:api_settings')})
         else:
-            return JsonResponse({'error':True, 'errors':form.errors})
+            return JsonResponse({'error': True, 'errors': form.errors})
+
 
 @login_required
 @admin_login_required
@@ -1203,6 +1203,7 @@ def blocked_domain_list(request):
             blocked_domains = blocked_domains.filter(created_by_id=request.POST.get('created_by', ''))
         return render(request, 'blocked_domain_list.html', {'blocked_domains': blocked_domains})
 
+
 @login_required
 @admin_login_required
 def edit_blocked_domain(request, blocked_domain_id):
@@ -1214,9 +1215,10 @@ def edit_blocked_domain(request, blocked_domain_id):
         form = BlockedDomainsForm(request.POST, instance=block_domain_obj)
         if form.is_valid():
             form.save()
-            return JsonResponse({'error':False, 'success_url':reverse('common:api_settings')})
+            return JsonResponse({'error': False, 'success_url': reverse('common:api_settings')})
         else:
-            return JsonResponse({'error':True, 'errors':form.errors})
+            return JsonResponse({'error': True, 'errors': form.errors})
+
 
 @login_required
 @admin_login_required
@@ -1238,9 +1240,10 @@ def add_blocked_email(request):
             email = form.save(commit=False)
             email.created_by = request.user
             email.save()
-            return JsonResponse({'error':False, 'success_url':reverse('common:api_settings')})
+            return JsonResponse({'error': False, 'success_url': reverse('common:api_settings')})
         else:
-            return JsonResponse({'error':True, 'errors':form.errors})
+            return JsonResponse({'error': True, 'errors': form.errors})
+
 
 @login_required
 @admin_login_required
@@ -1256,6 +1259,7 @@ def blocked_email_list(request):
             blocked_emails = blocked_emails.filter(created_by_id=request.POST.get('created_by', ''))
         return render(request, 'blocked_email_list.html', {'blocked_emails': blocked_emails})
 
+
 @login_required
 @admin_login_required
 def edit_blocked_email(request, blocked_email_id):
@@ -1267,9 +1271,10 @@ def edit_blocked_email(request, blocked_email_id):
         form = BlockedEmailForm(request.POST, instance=block_email_obj)
         if form.is_valid():
             form.save()
-            return JsonResponse({'error':False, 'success_url':reverse('common:api_settings')})
+            return JsonResponse({'error': False, 'success_url': reverse('common:api_settings')})
         else:
-            return JsonResponse({'error':True, 'errors':form.errors})
+            return JsonResponse({'error': True, 'errors': form.errors})
+
 
 @login_required
 @admin_login_required
@@ -1277,6 +1282,7 @@ def delete_blocked_email(request, blocked_email_id):
     block_email_obj = get_object_or_404(BlockedEmail, pk=blocked_email_id)
     block_email_obj.delete()
     return redirect(reverse('common:api_settings') + '?blocked_emails')
+
 
 @login_required(login_url='/login')
 @marketing_access_required
@@ -1291,7 +1297,7 @@ def contacts_list_elastic_search(request):
         contact_lists = ContactList.objects.all()
     else:
         contact_ids = request.user.marketing_contactlist.all().values_list('contacts',
-            flat=True)
+                                                                           flat=True)
         contacts = SearchQuerySet().filter(is_bounced='false', id__in=contact_ids).models(Contact)
         bounced_contacts = SearchQuerySet().filter(is_bounced='true', id__in=contact_ids).models(Contact)
         failed_contacts = SearchQuerySet().models(FailedContact).filter(created_by_id=str(request.user.id))
@@ -1306,8 +1312,8 @@ def contacts_list_elastic_search(request):
 
     if request.method == 'GET':
         context = {'contacts': contacts, 'users': users, 'contact_lists': contact_lists,
-            'bounced_contacts': bounced_contacts, 'failed_contacts': '',
-        }
+                   'bounced_contacts': bounced_contacts, 'failed_contacts': '',
+                   }
         return render(request, 'search_contact_emails.html', context)
 
     if request.method == 'POST':
@@ -1340,10 +1346,9 @@ def contacts_list_elastic_search(request):
             failed_contacts = failed_contacts.filter(contact_lists_id=data.get('contact_list'))
 
         context = {'contacts': contacts, 'users': users, 'contact_lists': contact_lists,
-            'bounced_contacts': bounced_contacts, 'failed_contacts': failed_contacts,
-        }
+                   'bounced_contacts': bounced_contacts, 'failed_contacts': failed_contacts,
+                   }
         return render(request, 'search_contact_emails.html', context)
-
 
 # class MarketingContactEmailSearch(SearchView):
 #     form_class = MarketingContactEmailSearchForm

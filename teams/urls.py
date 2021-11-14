@@ -1,11 +1,10 @@
 from django.urls import path
+
 from teams.views import (
     teams_list, team_create, team_edit, team_delete, team_detail
 )
 
-
 app_name = 'teams'
-
 
 urlpatterns = [
     path('', teams_list, name='teams_list'),

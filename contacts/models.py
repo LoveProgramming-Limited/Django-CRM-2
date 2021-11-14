@@ -1,9 +1,9 @@
 import arrow
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
+from phonenumber_field.modelfields import PhoneNumberField
 
 from common.models import Address, User
-from phonenumber_field.modelfields import PhoneNumberField
 from teams.models import Teams
 
 

@@ -1,18 +1,11 @@
-from datetime import date, datetime, timedelta
-
 from django.contrib.auth.decorators import login_required
-from django.contrib.auth.mixins import LoginRequiredMixin
-from django.contrib.sites.shortcuts import get_current_site
 from django.core.exceptions import PermissionDenied
-from django.db.models import Q
-from django.http import HttpResponse, JsonResponse
+from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render, reverse
-from django.views.generic import (CreateView, DeleteView, DetailView, FormView,
-                                  TemplateView, UpdateView, View)
 
 from common.models import User
-from teams.models import Teams
 from teams.forms import TeamForm
+from teams.models import Teams
 
 
 @login_required
@@ -67,7 +60,7 @@ def team_create(request):
         form = TeamForm(request.POST)
         if form.is_valid():
             task_obj = form.save(commit=False)
-            task_obj.created_by=request.user
+            task_obj.created_by = request.user
             task_obj.save()
             form.save_m2m()
             return JsonResponse({'error': False, 'success_url': reverse('teams:teams_list')})

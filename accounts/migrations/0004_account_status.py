@@ -11,7 +11,6 @@ def generate_status(apps, schema_editor):
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ('accounts', '0003_auto_20190201_1840'),
     ]

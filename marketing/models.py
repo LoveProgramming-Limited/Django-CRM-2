@@ -1,13 +1,14 @@
-import arrow
 import os
-from datetime import datetime, timedelta
-from django.db import models
-from django.utils.timesince import timesince
-from django.utils.translation import ugettext_lazy as _
+from datetime import datetime
+
+import arrow
 from django.core.validators import RegexValidator
-from django.dispatch import receiver
+from django.db import models
 from django.db.models import Sum
+from django.dispatch import receiver
 from django.template.defaultfilters import slugify
+from django.utils.translation import ugettext_lazy as _
+
 from common.models import User
 from common.utils import convert_to_custom_timezone
 
@@ -228,7 +229,7 @@ class Campaign(models.Model):
         max_length=1000, upload_to=get_campaign_attachment_path, blank=True, null=True)
 
     class Meta:
-        ordering = ('-created_on', )
+        ordering = ('-created_on',)
 
     # @property
     # def no_of_unsubscribers(self):
@@ -419,7 +420,7 @@ class DuplicateContacts(models.Model):
         ContactList, related_name='duplicate_contact_contact_list', on_delete=models.SET_NULL, null=True)
 
     class Meta:
-        ordering = ('id', )
+        ordering = ('id',)
 
 
 class BlockedDomain(models.Model):
@@ -455,5 +456,6 @@ class BlockedEmail(models.Model):
 
     def created_on_arrow(self):
         return arrow.get(self.created_on).humanize()
+
     class Meta:
         ordering = ('created_on',)
