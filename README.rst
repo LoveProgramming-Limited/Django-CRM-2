@@ -1,16 +1,31 @@
+TOC
+======================
+
+- [How to run](#how-to-run)
+- [What is this Django-CRM-2 repo?](#what-is-this-django-crm-2-repo-)
+- [Reason for Django-CRM-2](#reason-for-django-crm-2)
+- [Django-CRM (original readme)](#django-crm--original-readme-)
+
+
+
 How to run 
 ========================
 
 install docker 
 
-`docker-compose up --build`
+run `docker-compose up --build`
 
-then you go localhost:8001 
+django web is at : localhost:8001 
+
+celery visualizer(flower) is at : localhost:8899
 
 
-Friendly Note       
-==========================
+What is this Django-CRM-2 repo?    
+==============================
+A "fork" from  Django-CRM tag 0.5.0 with all fixes 
 
+Reason for Django-CRM-2
+=================================
 - I notice that the master branch is going more and more broken in https://github.com/MicroPyramid/Django-CRM.
    - login page is deleted.
    - The pictures from the doc are being deleted slowly (I wonder why they removed the images...)
