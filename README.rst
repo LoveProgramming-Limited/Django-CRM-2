@@ -2,15 +2,15 @@ How to run
 =====================================
 
 
-install docker 
+1. install docker 
 
-run `docker-compose up --build`
+2. run `docker-compose up --build`
 
-cd into web container, create a superuser by `manage.py createsuperuser`
+3. cd into web container, create a superuser by `manage.py createsuperuser`
 
-django web is at : localhost:8001   , login with superuser account
+django web is at : `localhost:8001`   , login with superuser account
 
-celery visualizer(flower) is at : localhost:8899
+celery visualizer(flower) is at : `localhost:8899`
 
 
 What is this Django-CRM-2 repo?    
