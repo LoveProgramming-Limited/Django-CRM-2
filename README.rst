@@ -24,6 +24,7 @@ Reason for Django-CRM-2
    - The pictures from the doc are being deleted slowly (I wonder why they removed the images...)
    - The docker file is unmaintained 
    - No body are answering the issues 
+   - being informed of the plan to move to other frontend platform https://github.com/MicroPyramid/Django-CRM/issues/454
    - ....., etc 
 - This is originally a very amazing open-source repo. 
    - So I slowly trace back to a reasonable tag where things are still making-sense (0.5.0) and applies following changes
